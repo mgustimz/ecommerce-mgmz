@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:ecommerce_mgmz;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+app:
+  jwt:
+    secret: test-secret-test-secret-test-secret-test-secret
+    expiration-minutes: 60
+  admin:
+    email: admin@test.local
+    password: admin12345
+  shipping:
+    flat-fee: 15000
+    free-shipping-threshold: 250000
+    external-url:
+    external-api-key:
+    biteship-base-url: https://api.biteship.com
+    biteship-api-key:
+    origin-area-id:
+    origin-postal-code: 10110
+    origin-latitude:
+    origin-longitude:
+  payment:
+    expiration-minutes: 60

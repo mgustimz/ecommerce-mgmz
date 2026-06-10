@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: ecommerce-mgmz
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ecommerce_mgmz}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-before-production-change-this-secret}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:1440}
+  admin:
+    email: ${ADMIN_EMAIL:admin@mgmz.local}
+    password: ${ADMIN_PASSWORD:admin12345}
+  shipping:
+    flat-fee: ${SHIPPING_FLAT_FEE:15000}
+    free-shipping-threshold: ${FREE_SHIPPING_THRESHOLD:250000}
+    external-url: ${SHIPPING_EXTERNAL_URL:}
+    external-api-key: ${SHIPPING_EXTERNAL_API_KEY:}
+    biteship-base-url: ${BITESHIP_BASE_URL:https://api.biteship.com}
+    biteship-api-key: ${BITESHIP_API_KEY:}
+    origin-area-id: ${SHIPPER_ORIGIN_AREA_ID:}
+    origin-postal-code: ${SHIPPER_ORIGIN_POSTAL_CODE:}
+    origin-latitude: ${SHIPPER_ORIGIN_LATITUDE:}
+    origin-longitude: ${SHIPPER_ORIGIN_LONGITUDE:}
+  payment:
+    expiration-minutes: ${PAYMENT_EXPIRATION_MINUTES:60}

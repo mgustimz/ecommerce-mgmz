@@ -1,0 +1,16 @@
+{
+  "name": "ecommerce-mgmz",
+  "private": true,
+  "packageManager": "pnpm@10.21.0",
+  "scripts": {
+    "dev:api": "cd apps/api && ./mvnw spring-boot:run",
+    "dev:web": "pnpm --filter @mgmz/web dev",
+    "dev:admin": "pnpm --filter @mgmz/admin dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

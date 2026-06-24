@@ -1,8 +1,18 @@
 HELP.md
 target/
+**/target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Node / pnpm ###
+node_modules/
+.pnpm-store/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
 
 ### STS ###
 .apt_generated
@@ -36,3 +46,4 @@ build/
 .env
 .env.*
 !.env.example
+!.env.local.example

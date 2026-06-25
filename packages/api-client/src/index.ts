@@ -33,6 +33,28 @@ export type Product = {
   categoryName: string | null;
 };
 
+export type ProductInput = {
+  name: string;
+  slug?: string | null;
+  sku: string;
+  description?: string | null;
+  price: string | number;
+  stock: number;
+  weightGram: number;
+  lengthCm: number;
+  widthCm: number;
+  heightCm: number;
+  shippingCategory: string;
+  imageUrls: string[];
+  categoryId?: number | null;
+  status: string;
+};
+
+export type CategoryInput = {
+  name: string;
+  description?: string | null;
+};
+
 export type CartItem = {
   id: number;
   productId: number;
@@ -213,13 +235,17 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
     admin: {
       dashboardSummary: (token: string) => request<DashboardSummary>("/admin/dashboard/summary", { token }),
       products: {
-        create: (token: string, body: unknown) => request<Product>("/admin/products", { method: "POST", token, body }),
-        update: (token: string, id: number, body: unknown) => request<Product>(`/admin/products/${id}`, { method: "PUT", token, body }),
+        list: (token: string, query?: { q?: string; categoryId?: number; sort?: string; page?: number; size?: number }) =>
+          request<PageResponse<Product>>("/admin/products", { token, query }),
+        get: (token: string, id: number) => request<Product>(`/admin/products/${id}`, { token }),
+        create: (token: string, body: ProductInput) => request<Product>("/admin/products", { method: "POST", token, body }),
+        update: (token: string, id: number, body: ProductInput) => request<Product>(`/admin/products/${id}`, { method: "PUT", token, body }),
         delete: (token: string, id: number) => request<void>(`/admin/products/${id}`, { method: "DELETE", token })
       },
       categories: {
-        create: (token: string, body: unknown) => request<Category>("/admin/categories", { method: "POST", token, body }),
-        update: (token: string, id: number, body: unknown) => request<Category>(`/admin/categories/${id}`, { method: "PUT", token, body }),
+        list: (token: string) => request<Category[]>("/categories", { token }),
+        create: (token: string, body: CategoryInput) => request<Category>("/admin/categories", { method: "POST", token, body }),
+        update: (token: string, id: number, body: CategoryInput) => request<Category>(`/admin/categories/${id}`, { method: "PUT", token, body }),
         delete: (token: string, id: number) => request<void>(`/admin/categories/${id}`, { method: "DELETE", token })
       },
       orders: {

@@ -36,12 +36,24 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<ProductResponse> findAllProducts(String query, Long categoryId, ProductSort sort, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, toSort(sort));
+        Specification<Product> specification = products(query, categoryId);
+        return PageResponse.from(productRepository.findAll(specification, pageable).map(ProductResponse::from));
+    }
+
+    @Transactional(readOnly = true)
     public ProductResponse findActiveProduct(Long id) {
         Product product = findEntity(id);
         if (!product.isPublished()) {
             throw new ApiException(HttpStatus.NOT_FOUND, "Product not found");
         }
         return ProductResponse.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse findProduct(Long id) {
+        return ProductResponse.from(findEntity(id));
     }
 
     @Transactional(readOnly = true)
@@ -113,8 +125,15 @@ public class ProductService {
     }
 
     private Specification<Product> activeProducts(String query, Long categoryId) {
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.and(
+                criteriaBuilder.equal(root.get("status"), ProductStatus.ACTIVE),
+                products(query, categoryId).toPredicate(root, criteriaQuery, criteriaBuilder)
+        );
+    }
+
+    private Specification<Product> products(String query, Long categoryId) {
         return (root, criteriaQuery, criteriaBuilder) -> {
-            var predicate = criteriaBuilder.equal(root.get("status"), ProductStatus.ACTIVE);
+            var predicate = criteriaBuilder.conjunction();
             if (query != null && !query.isBlank()) {
                 String keyword = "%" + query.toLowerCase() + "%";
                 predicate = criteriaBuilder.and(

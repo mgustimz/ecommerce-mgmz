@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LogoutButton } from "./logout-button";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/login" className="mt-8 inline-flex rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-black text-slate-950">
               Admin login
             </Link>
+            <LogoutButton />
           </aside>
           <main className="p-5 md:p-8">{children}</main>
         </div>

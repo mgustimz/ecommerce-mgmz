@@ -44,6 +44,22 @@ public class ProductController {
         return productService.findActiveProductBySlug(slug);
     }
 
+    @GetMapping("/admin/products")
+    PageResponse<ProductResponse> findAllProducts(
+            @RequestParam(required = false, name = "q") String query,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "NAME_ASC") ProductSort sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size
+    ) {
+        return productService.findAllProducts(query, categoryId, sort, Math.max(page, 0), Math.min(Math.max(size, 1), 100));
+    }
+
+    @GetMapping("/admin/products/{id}")
+    ProductResponse findProduct(@PathVariable Long id) {
+        return productService.findProduct(id);
+    }
+
     @PostMapping("/admin/products")
     ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         ProductResponse response = productService.create(request);

@@ -1,6 +1,7 @@
 "use client";
 
 import { createApiClient } from "@mgmz/api-client";
+import { setAdminSession } from "@/lib/session";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("mgmz_admin_session", JSON.stringify(session));
+      setAdminSession(session);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");

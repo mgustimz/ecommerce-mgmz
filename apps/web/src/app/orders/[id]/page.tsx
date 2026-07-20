@@ -2,12 +2,21 @@
 
 import { createApiClient, type Order } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function OrderDetailPage() {
+  return (
+    <CustomerAuthGuard>
+      <OrderDetailContent />
+    </CustomerAuthGuard>
+  );
+}
+
+function OrderDetailContent() {
   const params = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +24,6 @@ export default function OrderDetailPage() {
   async function loadOrder() {
     const token = getToken();
     if (!token) {
-      setError("Login to view this order.");
       return;
     }
     setOrder(await createApiClient().orders.get(token, Number(params.id)));

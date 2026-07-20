@@ -1,10 +1,19 @@
 "use client";
 
 import { createApiClient, type Category } from "@mgmz/api-client";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
 import { getAdminToken } from "@/lib/session";
 import { useEffect, useState } from "react";
 
 export default function CategoriesPage() {
+  return (
+    <AdminAuthGuard>
+      <CategoriesContent />
+    </AdminAuthGuard>
+  );
+}
+
+function CategoriesContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editing, setEditing] = useState<Category | null>(null);
   const [error, setError] = useState<string | null>(null);

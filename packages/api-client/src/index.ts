@@ -250,8 +250,11 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       },
       orders: {
         list: (token: string) => request<Order[]>("/admin/orders", { token }),
+        get: (token: string, id: number) => request<Order>(`/orders/${id}`, { token }),
         updateStatus: (token: string, id: number, status: string) =>
-          request<Order>(`/admin/orders/${id}/status`, { method: "PUT", token, body: { status } })
+          request<Order>(`/admin/orders/${id}/status`, { method: "PUT", token, body: { status } }),
+        cancel: (token: string, id: number, reason: string) =>
+          request<Order>(`/admin/orders/${id}/cancel`, { method: "POST", token, body: { reason } })
       }
     }
   };

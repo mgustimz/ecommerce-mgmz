@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CustomerHeader } from "@/components/customer-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,13 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               MGMZ Store
             </Link>
             <nav className="flex items-center gap-5 text-sm font-semibold text-stone-700">
-              <Link href="/products">Products</Link>
-              <Link href="/cart">Cart</Link>
-              <Link href="/orders">Orders</Link>
-              <Link href="/account/addresses">Addresses</Link>
-              <Link href="/login" className="rounded-full bg-stone-900 px-4 py-2 text-white">
-                Login
-              </Link>
+              <CustomerHeader />
             </nav>
           </div>
         </header>

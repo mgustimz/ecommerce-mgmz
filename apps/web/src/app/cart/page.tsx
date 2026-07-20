@@ -2,11 +2,20 @@
 
 import { createApiClient, type Cart } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function CartPage() {
+  return (
+    <CustomerAuthGuard>
+      <CartContent />
+    </CustomerAuthGuard>
+  );
+}
+
+function CartContent() {
   const [cart, setCart] = useState<Cart | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

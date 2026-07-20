@@ -2,12 +2,21 @@
 
 import { createApiClient, type Address, type Cart } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function CheckoutPage() {
+  return (
+    <CustomerAuthGuard>
+      <CheckoutContent />
+    </CustomerAuthGuard>
+  );
+}
+
+function CheckoutContent() {
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -16,7 +25,6 @@ export default function CheckoutPage() {
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      setError("Login before checkout.");
       return;
     }
     Promise.all([createApiClient().cart.get(token), createApiClient().addresses.list(token)])

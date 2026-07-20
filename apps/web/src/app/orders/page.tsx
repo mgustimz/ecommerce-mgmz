@@ -2,18 +2,26 @@
 
 import { createApiClient, type Order } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function OrdersPage() {
+  return (
+    <CustomerAuthGuard>
+      <OrdersContent />
+    </CustomerAuthGuard>
+  );
+}
+
+function OrdersContent() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const token = getToken();
     if (!token) {
-      setError("Login to view orders.");
       return;
     }
     createApiClient().orders.listMine(token).then(setOrders).catch((err) => setError(err instanceof Error ? err.message : "Failed to load orders"));

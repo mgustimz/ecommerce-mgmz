@@ -1,12 +1,21 @@
 "use client";
 
 import { createApiClient, type Product } from "@mgmz/api-client";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
 import { getAdminToken } from "@/lib/session";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ProductForm } from "../../product-form";
 
 export default function EditProductPage() {
+  return (
+    <AdminAuthGuard>
+      <EditProductContent />
+    </AdminAuthGuard>
+  );
+}
+
+function EditProductContent() {
   const params = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);

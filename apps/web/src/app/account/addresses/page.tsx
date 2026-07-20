@@ -1,22 +1,34 @@
 "use client";
 
 import { createApiClient, type Address } from "@mgmz/api-client";
+import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function AddressesPage() {
+  return (
+    <CustomerAuthGuard>
+      <AddressesContent />
+    </CustomerAuthGuard>
+  );
+}
+
+function AddressesContent() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function loadAddresses() {
     const token = getToken();
     if (!token) {
-      setError("Login to manage addresses.");
       return;
     }
-    setAddresses(await createApiClient().addresses.list(token));
-    setError(null);
+    try {
+      setAddresses(await createApiClient().addresses.list(token));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load addresses");
+    }
   }
 
   useEffect(() => {

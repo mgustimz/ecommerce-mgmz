@@ -2,6 +2,7 @@
 
 import { createApiClient, type DashboardSummary } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
 import { useEffect, useState } from "react";
 
 function getToken() {
@@ -10,6 +11,14 @@ function getToken() {
 }
 
 export default function DashboardPage() {
+  return (
+    <AdminAuthGuard>
+      <DashboardContent />
+    </AdminAuthGuard>
+  );
+}
+
+function DashboardContent() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 

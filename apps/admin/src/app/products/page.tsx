@@ -2,11 +2,20 @@
 
 import { createApiClient, type Product } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
 import { getAdminToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ProductsPage() {
+  return (
+    <AdminAuthGuard>
+      <ProductsContent />
+    </AdminAuthGuard>
+  );
+}
+
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
 

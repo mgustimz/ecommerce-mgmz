@@ -32,3 +32,10 @@ export function getAdminToken() {
   const session = getAdminSession();
   return session?.role === "ADMIN" ? session.token : null;
 }
+
+export function forceAdminReLogin() {
+  clearAdminSession();
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+}

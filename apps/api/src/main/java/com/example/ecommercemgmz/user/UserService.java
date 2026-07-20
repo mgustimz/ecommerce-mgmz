@@ -1,17 +1,15 @@
 package com.example.ecommercemgmz.user;
 
 import com.example.ecommercemgmz.common.ApiException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final AppUserRepository userRepository;
-
-    public UserService(AppUserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Transactional(readOnly = true)
     public UserProfileResponse findProfile(Long userId) {

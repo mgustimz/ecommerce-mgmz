@@ -2,6 +2,11 @@
 
 Repo-specific notes for AI agents working in this monorepo.
 
+## Commit Policy
+
+- **The human commits and pushes.** The AI must never stage, commit, or push changes.
+- The AI leaves all changes unstaged after every task so the human can review before committing.
+
 ## Layout
 
 - `apps/api` - Spring Boot backend (Java 17, Maven, Flyway). Entry: `apps/api/src/main/java/com/example/ecommercemgmz/EcommerceMgmzApplication.java`.

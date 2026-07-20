@@ -1,5 +1,5 @@
 import { createApiClient } from "@mgmz/api-client";
-import { formatCurrency } from "@mgmz/shared";
+import { ProductCard } from "@/components/product-card";
 import Link from "next/link";
 
 type Props = {
@@ -9,45 +9,60 @@ type Props = {
 export default async function ProductsPage({ searchParams }: Props) {
   const params = await searchParams;
   const api = createApiClient();
-  const [products, categories] = await Promise.all([
+  const [productsResponse, categories] = await Promise.all([
     api.products.list({
       q: params.q,
       categoryId: params.categoryId ? Number(params.categoryId) : undefined,
       sort: params.sort ?? "NAME_ASC",
-      size: 24
+      size: 60
     }),
     api.categories.list().catch(() => [])
   ]);
 
-  return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="mb-8 rounded-3xl bg-white p-6 shadow-sm">
-        <h1 className="text-4xl font-black">Products</h1>
-        <form className="mt-6 grid gap-3 md:grid-cols-[1fr_220px_180px_auto]">
-          <input name="q" defaultValue={params.q} placeholder="Search products" className="rounded-2xl border border-stone-200 px-4 py-3" />
-          <select name="categoryId" defaultValue={params.categoryId ?? ""} className="rounded-2xl border border-stone-200 px-4 py-3">
-            <option value="">All categories</option>
-            {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-          </select>
-          <select name="sort" defaultValue={params.sort ?? "NAME_ASC"} className="rounded-2xl border border-stone-200 px-4 py-3">
-            <option value="NAME_ASC">Name A-Z</option>
-            <option value="PRICE_ASC">Lowest price</option>
-            <option value="PRICE_DESC">Highest price</option>
-          </select>
-          <button className="rounded-2xl bg-stone-900 px-5 py-3 font-bold text-white">Apply</button>
-        </form>
-      </div>
+  const activeCategory = params.categoryId ? categories.find((c) => c.id === Number(params.categoryId)) : null;
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {products.items.map((product) => (
-          <Link key={product.id} href={`/products/${product.slug}`} className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-            <div className="aspect-[4/3] rounded-2xl bg-stone-100" />
-            <h2 className="mt-4 text-lg font-black">{product.name}</h2>
-            <p className="mt-1 text-sm text-stone-500">Stock: {product.stock}</p>
-            <p className="mt-3 font-black text-amber-700">{formatCurrency(product.price)}</p>
-          </Link>
-        ))}
-      </div>
+  return (
+    <div className="mx-auto max-w-6xl px-5 py-8">
+      <nav className="mb-4 text-xs text-neutral-500">
+        <Link href="/" className="hover:text-red-600">Home</Link> / <span>Products</span>
+      </nav>
+
+      <h1 className="text-3xl font-black">
+        {activeCategory ? activeCategory.name : "All products"}
+      </h1>
+      <p className="mt-1 text-sm text-neutral-500">
+        {productsResponse.items.length} {productsResponse.items.length === 1 ? "product" : "products"} found
+      </p>
+
+      <form className="my-6 grid gap-3 rounded-lg border border-neutral-200 bg-white p-4 md:grid-cols-[1fr_220px_180px_auto]">
+        <input name="q" defaultValue={params.q} placeholder="Search products or SKU" className="input-field" />
+        <select name="categoryId" defaultValue={params.categoryId ?? ""} className="input-field">
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
+        </select>
+        <select name="sort" defaultValue={params.sort ?? "NAME_ASC"} className="input-field">
+          <option value="NAME_ASC">Name A-Z</option>
+          <option value="NEWEST">Newest</option>
+          <option value="PRICE_ASC">Lowest price</option>
+          <option value="PRICE_DESC">Highest price</option>
+        </select>
+        <button type="submit" className="btn-primary">Apply</button>
+      </form>
+
+      {productsResponse.items.length === 0 ? (
+        <div className="rounded-lg border border-neutral-200 bg-white p-10 text-center">
+          <p className="text-base font-bold">No products found</p>
+          <p className="mt-1 text-sm text-neutral-500">Try a different search term or category.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {productsResponse.items.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

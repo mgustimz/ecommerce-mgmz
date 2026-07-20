@@ -99,6 +99,7 @@ class CartServiceIntegrationTests {
                 "CART-SKU-" + id,
                 "Test cart product",
                 BigDecimal.valueOf(25000),
+                null,
                 stock,
                 500,
                 10,
@@ -107,7 +108,9 @@ class CartServiceIntegrationTests {
                 ProductShippingCategory.others,
                 List.of("https://example.com/product.jpg"),
                 null,
-                status
+                status,
+                null,
+                0
         ));
     }
 }

@@ -1,7 +1,7 @@
 package com.example.ecommercemgmz.order;
 
-import com.example.ecommercemgmz.payment.PaymentStatus;
 import com.example.ecommercemgmz.payment.PaymentMethod;
+import com.example.ecommercemgmz.payment.PaymentStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,12 +12,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "orders")
 public class CustomerOrder {
     @Id
@@ -77,9 +84,6 @@ public class CustomerOrder {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
-    protected CustomerOrder() {
-    }
-
     public CustomerOrder(Long customerId, BigDecimal subtotal, BigDecimal shippingFee, BigDecimal total, String shippingAddress, String notes, PaymentMethod paymentMethod, String paymentReference, Instant paymentExpiresAt, String shippingServiceCode, String shippingServiceName) {
         this.customerId = customerId;
         this.subtotal = subtotal;
@@ -94,82 +98,10 @@ public class CustomerOrder {
         this.shippingServiceName = shippingServiceName;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getCustomerId() {
-        return customerId;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public BigDecimal getShippingFee() {
-        return shippingFee;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public String getShippingAddress() {
-        return shippingAddress;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public String getCancellationReason() {
-        return cancellationReason;
-    }
-
-    public Instant getCancelledAt() {
-        return cancelledAt;
-    }
-
     public void cancel(String reason) {
         this.status = OrderStatus.CANCELLED;
         this.cancellationReason = reason;
         this.cancelledAt = Instant.now();
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public PaymentStatus getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public PaymentMethod getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public String getPaymentReference() {
-        return paymentReference;
-    }
-
-    public Instant getPaymentExpiresAt() {
-        return paymentExpiresAt;
-    }
-
-    public String getShippingServiceCode() {
-        return shippingServiceCode;
-    }
-
-    public String getShippingServiceName() {
-        return shippingServiceName;
-    }
-
-    public void setPaymentStatus(PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
     }
 
     public void markPaid() {
@@ -179,14 +111,6 @@ public class CustomerOrder {
 
     public void markPaymentFailed() {
         this.paymentStatus = PaymentStatus.FAILED;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public List<OrderItem> getItems() {
-        return items;
     }
 
     public void addItem(OrderItem item) {

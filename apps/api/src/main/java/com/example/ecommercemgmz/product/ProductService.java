@@ -6,8 +6,7 @@ import com.example.ecommercemgmz.common.ApiException;
 import com.example.ecommercemgmz.common.PageResponse;
 import com.example.ecommercemgmz.inventory.InventoryMovementType;
 import com.example.ecommercemgmz.inventory.InventoryService;
-import java.util.List;
-import java.util.Locale;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,17 +15,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+
 @Service
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final InventoryService inventoryService;
-
-    public ProductService(ProductRepository productRepository, CategoryService categoryService, InventoryService inventoryService) {
-        this.productRepository = productRepository;
-        this.categoryService = categoryService;
-        this.inventoryService = inventoryService;
-    }
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> findActiveProducts(String query, Long categoryId, ProductSort sort, int page, int size) {
@@ -80,6 +78,7 @@ public class ProductService {
                 request.sku(),
                 request.description(),
                 request.price(),
+                request.originalPrice(),
                 request.stock(),
                 request.weightGram(),
                 request.lengthCm(),
@@ -105,6 +104,7 @@ public class ProductService {
         product.setSku(request.sku());
         product.setDescription(request.description());
         product.setPrice(request.price());
+        product.setOriginalPrice(request.originalPrice());
         product.setStock(request.stock());
         product.setWeightGram(request.weightGram());
         product.setLengthCm(request.lengthCm());
@@ -113,6 +113,8 @@ public class ProductService {
         product.setShippingCategory(request.shippingCategory() == null ? ProductShippingCategory.others : request.shippingCategory());
         product.setCategory(category);
         product.setStatus(request.status());
+        product.setAverageRating(request.averageRating() == null ? BigDecimal.ZERO : request.averageRating());
+        product.setReviewCount(request.reviewCount());
         product.replaceImages(cleanImageUrls(request.imageUrls()));
         inventoryService.record(product, null, InventoryMovementType.ADMIN_ADJUSTMENT, product.getStock() - previousStock, "Admin product stock update");
         return ProductResponse.from(product);

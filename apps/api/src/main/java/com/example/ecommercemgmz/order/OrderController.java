@@ -3,8 +3,7 @@ package com.example.ecommercemgmz.order;
 import com.example.ecommercemgmz.auth.AuthenticatedUser;
 import com.example.ecommercemgmz.user.UserRole;
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
-
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @PostMapping("/orders/checkout")
     ResponseEntity<OrderResponse> checkout(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody CheckoutRequest request) {

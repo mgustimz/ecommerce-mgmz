@@ -3,7 +3,7 @@
 import { createApiClient, type Order } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
 import { AdminAuthGuard } from "@/components/admin-auth-guard";
-import { getAdminToken } from "@/lib/session";
+import { forceAdminReLogin, getAdminToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -30,7 +30,13 @@ function AdminOrdersContent() {
   }
 
   useEffect(() => {
-    loadOrders().catch((err) => setError(err instanceof Error ? err.message : "Failed to load orders"));
+    loadOrders().catch((err) => {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to load orders");
+    });
   }, []);
 
   return (

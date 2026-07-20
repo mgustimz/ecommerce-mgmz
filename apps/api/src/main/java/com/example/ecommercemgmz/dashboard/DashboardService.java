@@ -5,22 +5,20 @@ import com.example.ecommercemgmz.order.CustomerOrderRepository;
 import com.example.ecommercemgmz.order.OrderStatus;
 import com.example.ecommercemgmz.payment.PaymentStatus;
 import com.example.ecommercemgmz.product.ProductRepository;
-import java.math.BigDecimal;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class DashboardService {
     private static final int DEFAULT_LOW_STOCK_THRESHOLD = 5;
 
     private final CustomerOrderRepository orderRepository;
     private final ProductRepository productRepository;
-
-    public DashboardService(CustomerOrderRepository orderRepository, ProductRepository productRepository) {
-        this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
-    }
 
     @Transactional(readOnly = true)
     public DashboardSummaryResponse getSummary() {

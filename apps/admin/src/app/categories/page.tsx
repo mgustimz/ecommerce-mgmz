@@ -2,7 +2,7 @@
 
 import { createApiClient, type Category } from "@mgmz/api-client";
 import { AdminAuthGuard } from "@/components/admin-auth-guard";
-import { getAdminToken } from "@/lib/session";
+import { forceAdminReLogin, getAdminToken } from "@/lib/session";
 import { useEffect, useState } from "react";
 
 export default function CategoriesPage() {
@@ -29,7 +29,13 @@ function CategoriesContent() {
   }
 
   useEffect(() => {
-    loadCategories().catch((err) => setError(err instanceof Error ? err.message : "Failed to load categories"));
+    loadCategories().catch((err) => {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to load categories");
+    });
   }, []);
 
   async function saveCategory(formData: FormData) {

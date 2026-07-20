@@ -3,20 +3,16 @@ package com.example.ecommercemgmz.cart;
 import com.example.ecommercemgmz.common.ApiException;
 import com.example.ecommercemgmz.product.Product;
 import com.example.ecommercemgmz.product.ProductService;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
-
-    public CartService(CartItemRepository cartItemRepository, ProductService productService) {
-        this.cartItemRepository = cartItemRepository;
-        this.productService = productService;
-    }
 
     @Transactional(readOnly = true)
     public CartResponse findCart(Long customerId) {
@@ -51,10 +47,12 @@ public class CartService {
         cartItemRepository.delete(item);
     }
 
-    public List<CartItem> findItemsForCheckout(Long customerId) {
+    @Transactional(readOnly = true)
+    public java.util.List<CartItem> findItemsForCheckout(Long customerId) {
         return cartItemRepository.findByCustomerIdOrderByIdAsc(customerId);
     }
 
+    @Transactional
     public void clear(Long customerId) {
         cartItemRepository.deleteByCustomerId(customerId);
     }

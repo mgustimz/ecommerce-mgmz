@@ -6,7 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "customer_addresses")
 public class CustomerAddress {
 
@@ -53,9 +56,6 @@ public class CustomerAddress {
 
     @Column(nullable = false)
     private boolean defaultAddress;
-
-    protected CustomerAddress() {
-    }
 
     public CustomerAddress(Long customerId, String label, String recipientName, String phone, String street, String city, String province, String postalCode, String areaId, BigDecimal latitude, BigDecimal longitude, boolean defaultAddress) {
         this.customerId = customerId;

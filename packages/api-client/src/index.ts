@@ -21,6 +21,7 @@ export type Product = {
   sku: string;
   description: string | null;
   price: string | number;
+  originalPrice: string | number | null;
   stock: number;
   weightGram: number;
   lengthCm: number;
@@ -31,6 +32,8 @@ export type Product = {
   imageUrls: string[];
   categoryId: number | null;
   categoryName: string | null;
+  averageRating: string | number;
+  reviewCount: number;
 };
 
 export type ProductInput = {
@@ -39,6 +42,7 @@ export type ProductInput = {
   sku: string;
   description?: string | null;
   price: string | number;
+  originalPrice?: string | number | null;
   stock: number;
   weightGram: number;
   lengthCm: number;
@@ -140,6 +144,21 @@ export type DashboardSummary = {
   paidRevenue: string | number;
   lowStockProducts: number;
   recentOrders: unknown[];
+};
+
+export type InventoryMovementType = "PRODUCT_CREATED" | "ADMIN_ADJUSTMENT" | "ORDER_CREATED" | "ORDER_CANCELLED";
+
+export type InventoryMovement = {
+  id: number;
+  productId: number;
+  productName: string;
+  productSku: string;
+  orderId: number | null;
+  type: InventoryMovementType;
+  quantityChange: number;
+  stockAfter: number;
+  reason: string;
+  createdAt: string;
 };
 
 type RequestOptions = Omit<RequestInit, "body"> & {
@@ -255,6 +274,10 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
           request<Order>(`/admin/orders/${id}/status`, { method: "PUT", token, body: { status } }),
         cancel: (token: string, id: number, reason: string) =>
           request<Order>(`/admin/orders/${id}/cancel`, { method: "POST", token, body: { reason } })
+      },
+      inventory: {
+        list: (token: string, query?: { productId?: number }) =>
+          request<InventoryMovement[]>("/admin/inventory-movements", { token, query })
       }
     }
   };

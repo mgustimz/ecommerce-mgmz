@@ -56,43 +56,83 @@ function CartContent() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12">
-      <h1 className="text-4xl font-black">Cart</h1>
-      {isLoading && <p className="mt-6 text-stone-600">Loading cart...</p>}
-      {error && <p className="mt-6 rounded-2xl bg-amber-50 p-4 font-bold text-amber-800">{error} <Link href="/login" className="underline">Login</Link></p>}
-      {cart && (
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-          <div className="space-y-4">
-            {cart.items.length === 0 && <div className="rounded-3xl bg-white p-8 shadow-sm">Your cart is empty.</div>}
-            {cart.items.map((item) => (
-              <div key={item.id} className="grid gap-4 rounded-3xl bg-white p-5 shadow-sm md:grid-cols-[1fr_140px_130px] md:items-center">
-                <div>
-                  <h2 className="text-lg font-black">{item.productName}</h2>
-                  <p className="mt-1 text-sm text-stone-500">{formatCurrency(item.unitPrice)} each</p>
-                </div>
+    <div className="mx-auto max-w-6xl px-5 py-8">
+      <nav className="mb-4 text-xs text-neutral-500">
+        <Link href="/" className="hover:text-red-600">Home</Link> / <span>Cart</span>
+      </nav>
+      <h1 className="text-3xl font-black">Your cart</h1>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div className="space-y-3">
+          {isLoading && <p className="text-sm text-neutral-500">Loading cart...</p>}
+          {error && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
+              {error} <Link href="/login" className="underline">Login</Link>
+            </p>
+          )}
+          {cart && cart.items.length === 0 && (
+            <div className="rounded-lg border border-neutral-200 bg-white p-10 text-center">
+              <p className="text-base font-bold">Your cart is empty</p>
+              <p className="mt-1 text-sm text-neutral-500">Browse our products to add items.</p>
+              <Link href="/products" className="btn-primary mt-4 inline-flex">Shop products</Link>
+            </div>
+          )}
+          {cart && cart.items.map((item) => (
+            <div key={item.id} className="grid gap-4 rounded-lg border border-neutral-200 bg-white p-4 md:grid-cols-[120px_1fr_140px_140px] md:items-center">
+              <div className="grid h-28 w-28 place-items-center rounded bg-neutral-50 text-xs font-bold uppercase text-neutral-300">
+                No image
+              </div>
+              <div>
+                <h2 className="text-base font-black">{item.productName}</h2>
+                <p className="text-sm text-neutral-500">{formatCurrency(item.unitPrice)} each</p>
+              </div>
+              <div className="flex items-center rounded border border-neutral-300">
+                <button
+                  type="button"
+                  onClick={() => void updateItem(item.id, Math.max(1, item.quantity - 1))}
+                  className="px-3 py-2 text-lg font-bold text-neutral-500 hover:text-neutral-900"
+                >
+                  -
+                </button>
                 <input
                   type="number"
                   min={1}
                   value={item.quantity}
                   onChange={(event) => void updateItem(item.id, Math.max(1, Number(event.target.value)))}
-                  className="rounded-2xl border border-stone-200 px-4 py-3 font-bold"
+                  className="w-16 border-x border-neutral-300 bg-white py-2 text-center font-bold focus:outline-none"
                 />
-                <div className="text-left md:text-right">
-                  <p className="font-black text-amber-700">{formatCurrency(item.lineTotal)}</p>
-                  <button onClick={() => void removeItem(item.id)} className="mt-2 text-sm font-bold text-red-700">Remove</button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => void updateItem(item.id, item.quantity + 1)}
+                  className="px-3 py-2 text-lg font-bold text-neutral-500 hover:text-neutral-900"
+                >
+                  +
+                </button>
               </div>
-            ))}
-          </div>
-          <aside className="h-fit rounded-3xl bg-stone-900 p-6 text-white shadow-xl">
-            <p className="text-sm uppercase tracking-[0.24em] text-amber-300">Summary</p>
-            <p className="mt-4 text-3xl font-black">{formatCurrency(cart.subtotal)}</p>
-            <Link href="/checkout" className="mt-6 block rounded-2xl bg-amber-500 px-5 py-3 text-center font-black text-stone-950">
-              Checkout
+              <div className="text-right">
+                <p className="text-base font-black" style={{ color: "#cc1d00" }}>{formatCurrency(item.lineTotal)}</p>
+                <button onClick={() => void removeItem(item.id)} className="mt-2 text-xs font-bold text-neutral-500 hover:text-red-600">
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {cart && cart.items.length > 0 && (
+          <aside className="h-fit rounded-lg border border-neutral-200 bg-white p-6">
+            <h2 className="text-base font-black">Order summary</h2>
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between"><span>Subtotal</span><b>{formatCurrency(cart.subtotal)}</b></div>
+              <p className="text-xs text-neutral-500">Shipping calculated at checkout.</p>
+            </div>
+            <Link href="/checkout" className="btn-primary mt-5 w-full">Proceed to checkout</Link>
+            <Link href="/products" className="mt-3 block text-center text-sm font-bold hover:underline" style={{ color: "#cc1d00" }}>
+              Continue shopping
             </Link>
           </aside>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

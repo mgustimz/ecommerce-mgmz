@@ -2,34 +2,41 @@
 
 import { createApiClient, type Cart } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
-import { CustomerAuthGuard } from "@/components/customer-auth-guard";
+import { getAnonCartToken } from "@/lib/cart-cookie";
+import { dispatchCartUpdated } from "@/lib/cart-events";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function CartPage() {
-  return (
-    <CustomerAuthGuard>
-      <CartContent />
-    </CustomerAuthGuard>
-  );
+  return <CartContent />;
 }
 
 function CartContent() {
   const [cart, setCart] = useState<Cart | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
 
   async function loadCart() {
+    const api = createApiClient();
     const token = getToken();
     if (!token) {
-      setError("Login to view your cart.");
-      setIsLoading(false);
+      setIsGuest(true);
+      try {
+        setCart(await api.anonymousCart.get(getAnonCartToken()));
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load cart");
+      } finally {
+        setIsLoading(false);
+      }
       return;
     }
 
+    setIsGuest(false);
     try {
-      setCart(await createApiClient().cart.get(token));
+      setCart(await api.cart.get(token));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load cart");
@@ -43,17 +50,29 @@ function CartContent() {
   }, []);
 
   async function updateItem(itemId: number, quantity: number) {
+    const api = createApiClient();
     const token = getToken();
-    if (!token) return;
-    setCart(await createApiClient().cart.updateItem(token, itemId, { quantity }));
+    if (token) {
+      setCart(await api.cart.updateItem(token, itemId, { quantity }));
+    } else {
+      setCart(await api.anonymousCart.updateItem(getAnonCartToken(), itemId, { quantity }));
+    }
+    dispatchCartUpdated();
   }
 
   async function removeItem(itemId: number) {
+    const api = createApiClient();
     const token = getToken();
-    if (!token) return;
-    await createApiClient().cart.removeItem(token, itemId);
+    if (token) {
+      await api.cart.removeItem(token, itemId);
+    } else {
+      await api.anonymousCart.removeItem(getAnonCartToken(), itemId);
+    }
     await loadCart();
+    dispatchCartUpdated();
   }
+
+  const checkoutHref = isGuest ? "/login?next=/cart" : "/checkout";
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8">
@@ -67,7 +86,7 @@ function CartContent() {
           {isLoading && <p className="text-sm text-neutral-500">Loading cart...</p>}
           {error && (
             <p className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-800">
-              {error} <Link href="/login" className="underline">Login</Link>
+              {error}
             </p>
           )}
           {cart && cart.items.length === 0 && (
@@ -126,7 +145,12 @@ function CartContent() {
               <div className="flex justify-between"><span>Subtotal</span><b>{formatCurrency(cart.subtotal)}</b></div>
               <p className="text-xs text-neutral-500">Shipping calculated at checkout.</p>
             </div>
-            <Link href="/checkout" className="btn-primary mt-5 w-full">Proceed to checkout</Link>
+            {isGuest && (
+              <p className="mt-3 rounded border border-amber-200 bg-amber-50 p-3 text-xs font-bold text-amber-800">
+                Login to continue checkout. Your cart will be saved.
+              </p>
+            )}
+            <Link href={checkoutHref} className="btn-primary mt-5 w-full">Proceed to checkout</Link>
             <Link href="/products" className="mt-3 block text-center text-sm font-bold hover:underline" style={{ color: "#cc1d00" }}>
               Continue shopping
             </Link>

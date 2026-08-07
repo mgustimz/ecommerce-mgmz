@@ -103,6 +103,19 @@ export type AddressInput = {
   defaultAddress: boolean;
 };
 
+export type UserProfile = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+};
+
+export type UserProfileInput = {
+  name: string;
+  phone?: string | null;
+};
+
 export type OrderItem = {
   productId: number;
   productName: string;
@@ -163,6 +176,7 @@ export type InventoryMovement = {
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   token?: string | null;
+  anonymousToken?: string | null;
   body?: unknown;
   query?: Record<string, string | number | boolean | null | undefined>;
 };
@@ -189,6 +203,7 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       headers: {
         "Content-Type": "application/json",
         ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+        ...(options.anonymousToken ? { "X-Anonymous-Cart-Token": options.anonymousToken } : {}),
         ...options.headers
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body)
@@ -236,6 +251,22 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       updateItem: (token: string, itemId: number, body: { quantity: number }) =>
         request<Cart>(`/cart/items/${itemId}`, { method: "PUT", token, body }),
       removeItem: (token: string, itemId: number) => request<void>(`/cart/items/${itemId}`, { method: "DELETE", token })
+    },
+    anonymousCart: {
+      get: (anonymousToken: string) => request<Cart>("/cart/anonymous", { anonymousToken }),
+      addItem: (anonymousToken: string, body: { productId: number; quantity: number }) =>
+        request<Cart>("/cart/anonymous/items", { method: "POST", anonymousToken, body }),
+      updateItem: (anonymousToken: string, itemId: number, body: { quantity: number }) =>
+        request<Cart>(`/cart/anonymous/items/${itemId}`, { method: "PUT", anonymousToken, body }),
+      removeItem: (anonymousToken: string, itemId: number) => request<void>(`/cart/anonymous/items/${itemId}`, { method: "DELETE", anonymousToken }),
+      merge: (token: string, anonymousToken: string) =>
+        request<Cart>("/cart/anonymous/merge", { method: "POST", token, anonymousToken })
+    },
+    users: {
+      me: {
+        get: (token: string) => request<UserProfile>("/me", { token }),
+        update: (token: string, body: UserProfileInput) => request<UserProfile>("/me", { method: "PUT", token, body })
+      }
     },
     addresses: {
       list: (token: string) => request<Address[]>("/me/addresses", { token }),

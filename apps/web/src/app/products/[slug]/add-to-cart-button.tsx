@@ -1,6 +1,8 @@
 "use client";
 
 import { createApiClient } from "@mgmz/api-client";
+import { getAnonCartToken } from "@/lib/cart-cookie";
+import { dispatchCartUpdated } from "@/lib/cart-events";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useState } from "react";
@@ -11,16 +13,17 @@ export function AddToCartButton({ productId, disabled }: { productId: number; di
   const [isLoading, setIsLoading] = useState(false);
 
   async function addToCart() {
-    const token = getToken();
-    if (!token) {
-      setMessage("Please login to add products to cart.");
-      return;
-    }
-
     setIsLoading(true);
     setMessage(null);
     try {
-      await createApiClient().cart.addItem(token, { productId, quantity });
+      const api = createApiClient();
+      const token = getToken();
+      if (token) {
+        await api.cart.addItem(token, { productId, quantity });
+      } else {
+        await api.anonymousCart.addItem(getAnonCartToken(), { productId, quantity });
+      }
+      dispatchCartUpdated();
       setMessage("Added to cart successfully.");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Failed to add to cart");

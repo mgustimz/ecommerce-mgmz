@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CartNavItem } from "@/components/cart-nav-item";
 import { CustomerHeader } from "@/components/customer-header";
 import "./globals.css";
 
@@ -39,9 +40,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 Search
               </button>
             </form>
-            <div className="hidden text-right md:block">
-              <p className="text-sm font-bold">Customer Service</p>
-              <p className="text-sm text-neutral-600">+62 21 555 0000</p>
+            <div className="flex items-center gap-6">
+              <div className="hidden text-right md:block">
+                <p className="text-sm font-bold">Customer Service</p>
+                <p className="text-sm text-neutral-600">+62 21 555 0000</p>
+              </div>
+              <CartNavItem />
             </div>
           </div>
         </header>
@@ -51,7 +55,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/products" className="rounded px-4 py-3 hover:bg-neutral-100">Products</Link>
             <Link href="/products?sort=NEWEST" className="rounded px-4 py-3 hover:bg-neutral-100">New Arrivals</Link>
             <Link href="/products?sort=PRICE_ASC" className="rounded px-4 py-3 hover:bg-neutral-100">Best Deals</Link>
-            <Link href="/cart" className="rounded px-4 py-3 hover:bg-neutral-100">Cart</Link>
             <Link href="/orders" className="rounded px-4 py-3 hover:bg-neutral-100">My Orders</Link>
             <Link href="/account/addresses" className="rounded px-4 py-3 hover:bg-neutral-100">Addresses</Link>
           </div>

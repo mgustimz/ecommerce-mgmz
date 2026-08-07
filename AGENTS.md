@@ -7,6 +7,18 @@ Repo-specific notes for AI agents working in this monorepo.
 - **The human commits and pushes.** The AI must never stage, commit, or push changes.
 - The AI leaves all changes unstaged after every task so the human can review before committing.
 
+## Roadmap Updates
+
+- `ROADMAP.md` is the single source of truth for project progress.
+- **After finishing a phase or any meaningful step, the AI must update `ROADMAP.md`** to reflect the new state:
+  - Mark completed items with ✅.
+  - Add new phases or items if scope changes.
+  - Promote the next planned phase to 🟡 (in progress) when work starts.
+  - Use status emojis: ✅ complete, 🟡 in progress, ⏳ planned.
+  - Use effort tags: `S` (≤ half day), `M` (1-3 days), `L` (> 3 days).
+  - Include a short "Why this matters" line per phase.
+- Do not wait until the end of a long session to update the roadmap. Update it as you go.
+
 ## Layout
 
 - `apps/api` - Spring Boot backend (Java 17, Maven, Flyway). Entry: `apps/api/src/main/java/com/example/ecommercemgmz/EcommerceMgmzApplication.java`.
@@ -80,6 +92,15 @@ Flyway auto-migrates on backend startup. If you change entities, add a new `V*__
 - Admin persists token at `localStorage["mgmz_admin_session"]` via `apps/admin/src/lib/session.ts`.
 - Backend CORS allows `http://localhost:3000` and `http://localhost:3001` (configured in `apps/api/src/main/java/com/example/ecommercemgmz/config/SecurityConfig.java`).
 - Protected customer routes are wrapped in `<CustomerAuthGuard>` (redirects to `/login`); admin routes in `<AdminAuthGuard>` (redirects to `/login`).
+- `JwtAuthenticationFilter` clears the security context on invalid tokens (does not return 401 immediately) so public endpoints still work when a stale token is sent.
+
+## Security Invariants
+
+- **CSRF protection is intentionally disabled.** The API is stateless and authenticates only via the `Authorization: Bearer <jwt>` header (read by `JwtAuthenticationFilter`). Browsers do not auto-attach `Authorization` headers cross-origin, and the explicit CORS allow-list in `SecurityConfig` is the actual CSRF defense. The anonymous cart cookie is `SameSite=Lax` and not sent on cross-site POSTs.
+- **Do not switch to cookie-based auth** (JSESSIONID, HttpOnly auth cookies, etc.) without also re-enabling CSRF.
+- **Do not call `allowCredentials(true)`** with a wildcard CORS origin. CORS with credentials and a wildcard is rejected by browsers, but loosening this later would re-introduce CSRF exposure.
+- **Keep the CORS allow-list explicit** (`http://localhost:3000`, `http://localhost:3001`). Adding a new frontend host means updating both `corsConfigurationSource` and the documented dev hosts.
+- See `SECURITY.md` for the full threat model.
 
 ## Shared API Client
 
@@ -95,6 +116,12 @@ Always extend `packages/api-client/src/index.ts` when adding or changing a backe
 - Cart delete endpoint returns 204; the storefront calls `cart.get` again instead of expecting a body.
 - Admin product form uses backend `ProductShippingCategory` enum values (lowercase, snake_case where applicable: `electronic`, `food_and_drink`, etc.), not human labels.
 - Backend status enums are strings, not booleans (`ProductStatus`: `ACTIVE|DRAFT|ARCHIVED`; `OrderStatus`: `PENDING_PAYMENT|PAID|PROCESSING|SHIPPED|COMPLETED|CANCELLED`).
+
+## Lombok Notes
+
+- Lombok is configured in `apps/api/pom.xml` (dependency + annotation processor).
+- **Lombok does NOT propagate `@Value` from field to constructor parameter.** For fields using `@Value("${...}")`, declare an explicit constructor (e.g. `JwtService`, `OrderService`, `AdminUserSeeder`).
+- JPA entities use `@Getter @Setter @NoArgsConstructor(access = AccessLevel.PROTECTED)` to keep the JPA-required protected no-arg constructor.
 
 ## Verification Order
 
@@ -116,3 +143,8 @@ cd apps/api && ./mvnw test
 - Admin order detail uses `GET /api/orders/{id}` with an admin JWT (the order controller allows admins through the same path).
 - Checkout currently submits `REG` or `EXP` shipping codes directly; the shipping rate selector UI is not yet wired to `POST /api/shipping/rates`.
 - Admin inventory list page is a placeholder; the endpoint `GET /api/admin/inventory-movements` exists but is not yet consumed in the UI.
+
+## Progress Tracking
+
+- See `ROADMAP.md` for the live roadmap.
+- Update it after every meaningful step, not at the end of a session.

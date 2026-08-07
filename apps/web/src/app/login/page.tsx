@@ -1,6 +1,7 @@
 "use client";
 
 import { createApiClient } from "@mgmz/api-client";
+import { clearAnonCartToken, getAnonCartToken } from "@/lib/cart-cookie";
 import { setSession } from "@/lib/session";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,7 +21,21 @@ export default function LoginPage() {
         password: String(formData.get("password"))
       });
       setSession(session);
-      router.push("/products");
+
+      // Merge any guest cart into the user's cart.
+      const anonToken = getAnonCartToken();
+      if (anonToken) {
+        try {
+          await createApiClient().anonymousCart.merge(session.token, anonToken);
+        } catch {
+          // Ignore merge failures; the guest cart may simply be empty.
+        }
+        clearAnonCartToken();
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get("next");
+      router.push(next || "/products");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

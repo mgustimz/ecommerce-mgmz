@@ -5,18 +5,17 @@ import com.example.ecommercemgmz.order.CustomerOrder;
 import com.example.ecommercemgmz.order.CustomerOrderRepository;
 import com.example.ecommercemgmz.order.OrderResponse;
 import com.example.ecommercemgmz.order.OrderStatus;
-import java.time.Instant;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
     private final CustomerOrderRepository orderRepository;
-
-    public PaymentService(CustomerOrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
 
     @Transactional(readOnly = true)
     public PaymentResponse getCustomerPayment(Long customerId, Long orderId) {

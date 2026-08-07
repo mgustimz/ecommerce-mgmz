@@ -11,6 +11,7 @@ public record ProductResponse(
         String sku,
         String description,
         BigDecimal price,
+        BigDecimal originalPrice,
         int stock,
         int weightGram,
         int lengthCm,
@@ -20,7 +21,9 @@ public record ProductResponse(
         ProductStatus status,
         List<String> imageUrls,
         Long categoryId,
-        String categoryName
+        String categoryName,
+        BigDecimal averageRating,
+        int reviewCount
 ) {
     public static ProductResponse from(Product product) {
         Long categoryId = product.getCategory() == null ? null : product.getCategory().getId();
@@ -32,6 +35,7 @@ public record ProductResponse(
                 product.getSku(),
                 product.getDescription(),
                 product.getPrice(),
+                product.getOriginalPrice(),
                 product.getStock(),
                 product.getWeightGram(),
                 product.getLengthCm(),
@@ -44,7 +48,9 @@ public record ProductResponse(
                         .map(ProductImage::getImageUrl)
                         .toList(),
                 categoryId,
-                categoryName
+                categoryName,
+                product.getAverageRating(),
+                product.getReviewCount()
         );
     }
 }

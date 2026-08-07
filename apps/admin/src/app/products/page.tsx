@@ -2,11 +2,20 @@
 
 import { createApiClient, type Product } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
-import { getAdminToken } from "@/lib/session";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
+import { forceAdminReLogin, getAdminToken } from "@/lib/session";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ProductsPage() {
+  return (
+    <AdminAuthGuard>
+      <ProductsContent />
+    </AdminAuthGuard>
+  );
+}
+
+function ProductsContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +32,13 @@ export default function ProductsPage() {
   }
 
   useEffect(() => {
-    loadProducts().catch((err) => setError(err instanceof Error ? err.message : "Failed to load products"));
+    loadProducts().catch((err) => {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to load products");
+    });
   }, []);
 
   async function deleteProduct(id: number) {

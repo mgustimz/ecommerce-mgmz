@@ -2,24 +2,37 @@
 
 import { createApiClient, type DashboardSummary } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
+import { forceAdminReLogin, getAdminToken } from "@/lib/session";
 import { useEffect, useState } from "react";
 
-function getToken() {
-  const raw = localStorage.getItem("mgmz_admin_session");
-  return raw ? JSON.parse(raw).token as string : null;
+export default function DashboardPage() {
+  return (
+    <AdminAuthGuard>
+      <DashboardContent />
+    </AdminAuthGuard>
+  );
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getToken();
+    const token = getAdminToken();
     if (!token) {
       setError("Login as admin to load dashboard data.");
       return;
     }
-    createApiClient().admin.dashboardSummary(token).then(setSummary).catch((err) => setError(err instanceof Error ? err.message : "Failed to load dashboard"));
+    createApiClient().admin.dashboardSummary(token)
+      .then(setSummary)
+      .catch((err) => {
+        if (err instanceof Error && /status 401/.test(err.message)) {
+          forceAdminReLogin();
+          return;
+        }
+        setError(err instanceof Error ? err.message : "Failed to load dashboard");
+      });
   }, []);
 
   return (

@@ -21,6 +21,7 @@ export type Product = {
   sku: string;
   description: string | null;
   price: string | number;
+  originalPrice: string | number | null;
   stock: number;
   weightGram: number;
   lengthCm: number;
@@ -31,6 +32,8 @@ export type Product = {
   imageUrls: string[];
   categoryId: number | null;
   categoryName: string | null;
+  averageRating: string | number;
+  reviewCount: number;
 };
 
 export type ProductInput = {
@@ -39,6 +42,7 @@ export type ProductInput = {
   sku: string;
   description?: string | null;
   price: string | number;
+  originalPrice?: string | number | null;
   stock: number;
   weightGram: number;
   lengthCm: number;
@@ -99,6 +103,19 @@ export type AddressInput = {
   defaultAddress: boolean;
 };
 
+export type UserProfile = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+};
+
+export type UserProfileInput = {
+  name: string;
+  phone?: string | null;
+};
+
 export type OrderItem = {
   productId: number;
   productName: string;
@@ -142,8 +159,24 @@ export type DashboardSummary = {
   recentOrders: unknown[];
 };
 
+export type InventoryMovementType = "PRODUCT_CREATED" | "ADMIN_ADJUSTMENT" | "ORDER_CREATED" | "ORDER_CANCELLED";
+
+export type InventoryMovement = {
+  id: number;
+  productId: number;
+  productName: string;
+  productSku: string;
+  orderId: number | null;
+  type: InventoryMovementType;
+  quantityChange: number;
+  stockAfter: number;
+  reason: string;
+  createdAt: string;
+};
+
 type RequestOptions = Omit<RequestInit, "body"> & {
   token?: string | null;
+  anonymousToken?: string | null;
   body?: unknown;
   query?: Record<string, string | number | boolean | null | undefined>;
 };
@@ -170,6 +203,7 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       headers: {
         "Content-Type": "application/json",
         ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+        ...(options.anonymousToken ? { "X-Anonymous-Cart-Token": options.anonymousToken } : {}),
         ...options.headers
       },
       body: options.body === undefined ? undefined : JSON.stringify(options.body)
@@ -218,6 +252,22 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
         request<Cart>(`/cart/items/${itemId}`, { method: "PUT", token, body }),
       removeItem: (token: string, itemId: number) => request<void>(`/cart/items/${itemId}`, { method: "DELETE", token })
     },
+    anonymousCart: {
+      get: (anonymousToken: string) => request<Cart>("/cart/anonymous", { anonymousToken }),
+      addItem: (anonymousToken: string, body: { productId: number; quantity: number }) =>
+        request<Cart>("/cart/anonymous/items", { method: "POST", anonymousToken, body }),
+      updateItem: (anonymousToken: string, itemId: number, body: { quantity: number }) =>
+        request<Cart>(`/cart/anonymous/items/${itemId}`, { method: "PUT", anonymousToken, body }),
+      removeItem: (anonymousToken: string, itemId: number) => request<void>(`/cart/anonymous/items/${itemId}`, { method: "DELETE", anonymousToken }),
+      merge: (token: string, anonymousToken: string) =>
+        request<Cart>("/cart/anonymous/merge", { method: "POST", token, anonymousToken })
+    },
+    users: {
+      me: {
+        get: (token: string) => request<UserProfile>("/me", { token }),
+        update: (token: string, body: UserProfileInput) => request<UserProfile>("/me", { method: "PUT", token, body })
+      }
+    },
     addresses: {
       list: (token: string) => request<Address[]>("/me/addresses", { token }),
       create: (token: string, body: AddressInput) => request<Address>("/me/addresses", { method: "POST", token, body }),
@@ -250,8 +300,15 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       },
       orders: {
         list: (token: string) => request<Order[]>("/admin/orders", { token }),
+        get: (token: string, id: number) => request<Order>(`/orders/${id}`, { token }),
         updateStatus: (token: string, id: number, status: string) =>
-          request<Order>(`/admin/orders/${id}/status`, { method: "PUT", token, body: { status } })
+          request<Order>(`/admin/orders/${id}/status`, { method: "PUT", token, body: { status } }),
+        cancel: (token: string, id: number, reason: string) =>
+          request<Order>(`/admin/orders/${id}/cancel`, { method: "POST", token, body: { reason } })
+      },
+      inventory: {
+        list: (token: string, query?: { productId?: number }) =>
+          request<InventoryMovement[]>("/admin/inventory-movements", { token, query })
       }
     }
   };

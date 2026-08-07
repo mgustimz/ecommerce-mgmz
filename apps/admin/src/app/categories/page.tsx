@@ -1,10 +1,19 @@
 "use client";
 
 import { createApiClient, type Category } from "@mgmz/api-client";
-import { getAdminToken } from "@/lib/session";
+import { AdminAuthGuard } from "@/components/admin-auth-guard";
+import { forceAdminReLogin, getAdminToken } from "@/lib/session";
 import { useEffect, useState } from "react";
 
 export default function CategoriesPage() {
+  return (
+    <AdminAuthGuard>
+      <CategoriesContent />
+    </AdminAuthGuard>
+  );
+}
+
+function CategoriesContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editing, setEditing] = useState<Category | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +29,13 @@ export default function CategoriesPage() {
   }
 
   useEffect(() => {
-    loadCategories().catch((err) => setError(err instanceof Error ? err.message : "Failed to load categories"));
+    loadCategories().catch((err) => {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to load categories");
+    });
   }, []);
 
   async function saveCategory(formData: FormData) {

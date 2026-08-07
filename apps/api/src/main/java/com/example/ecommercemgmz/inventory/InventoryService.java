@@ -1,17 +1,16 @@
 package com.example.ecommercemgmz.inventory;
 
 import com.example.ecommercemgmz.product.Product;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class InventoryService {
     private final InventoryMovementRepository inventoryMovementRepository;
-
-    public InventoryService(InventoryMovementRepository inventoryMovementRepository) {
-        this.inventoryMovementRepository = inventoryMovementRepository;
-    }
 
     @Transactional
     public void record(Product product, Long orderId, InventoryMovementType type, int quantityChange, String reason) {

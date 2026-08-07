@@ -1,27 +1,30 @@
 "use client";
 
 import { createApiClient } from "@mgmz/api-client";
+import { getAnonCartToken } from "@/lib/cart-cookie";
+import { dispatchCartUpdated } from "@/lib/cart-events";
 import { getToken } from "@/lib/session";
 import Link from "next/link";
 import { useState } from "react";
 
-export function AddToCartButton({ productId }: { productId: number }) {
+export function AddToCartButton({ productId, disabled }: { productId: number; disabled?: boolean }) {
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   async function addToCart() {
-    const token = getToken();
-    if (!token) {
-      setMessage("Login first to add products to cart.");
-      return;
-    }
-
     setIsLoading(true);
     setMessage(null);
     try {
-      await createApiClient().cart.addItem(token, { productId, quantity });
-      setMessage("Added to cart.");
+      const api = createApiClient();
+      const token = getToken();
+      if (token) {
+        await api.cart.addItem(token, { productId, quantity });
+      } else {
+        await api.anonymousCart.addItem(getAnonCartToken(), { productId, quantity });
+      }
+      dispatchCartUpdated();
+      setMessage("Added to cart successfully.");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Failed to add to cart");
     } finally {
@@ -31,19 +34,49 @@ export function AddToCartButton({ productId }: { productId: number }) {
 
   return (
     <div className="mt-8">
-      <div className="flex max-w-xs gap-3">
-        <input
-          type="number"
-          min={1}
-          value={quantity}
-          onChange={(event) => setQuantity(Math.max(1, Number(event.target.value)))}
-          className="w-24 rounded-full border border-stone-200 bg-white px-4 py-3 font-bold"
-        />
-        <button onClick={addToCart} disabled={isLoading} className="flex-1 rounded-full bg-stone-900 px-7 py-4 font-black text-white disabled:opacity-60">
-          {isLoading ? "Adding..." : "Add to cart"}
+      <div className="flex max-w-md gap-3">
+        <div className="flex items-center rounded border border-neutral-300">
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            className="px-3 py-2 text-lg font-bold text-neutral-500 hover:text-neutral-900"
+            disabled={disabled}
+          >
+            -
+          </button>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(event) => setQuantity(Math.max(1, Number(event.target.value)))}
+            className="w-16 border-x border-neutral-300 bg-white py-2 text-center font-bold focus:outline-none"
+            disabled={disabled}
+          />
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => q + 1)}
+            className="px-3 py-2 text-lg font-bold text-neutral-500 hover:text-neutral-900"
+            disabled={disabled}
+          >
+            +
+          </button>
+        </div>
+        <button
+          onClick={addToCart}
+          disabled={isLoading || disabled}
+          className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? "Adding..." : disabled ? "Out of stock" : "Add to cart"}
         </button>
       </div>
-      {message && <p className="mt-4 text-sm font-bold text-stone-700">{message} <Link href="/cart" className="text-amber-700">View cart</Link></p>}
+      {message && (
+        <p className="mt-3 text-sm text-neutral-700">
+          {message}{" "}
+          <Link href="/cart" className="font-bold" style={{ color: "#cc1d00" }}>
+            View cart
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

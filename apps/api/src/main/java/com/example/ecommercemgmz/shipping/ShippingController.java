@@ -7,29 +7,26 @@ import com.example.ecommercemgmz.cart.CartItem;
 import com.example.ecommercemgmz.cart.CartService;
 import com.example.ecommercemgmz.common.ApiException;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/shipping")
+@RequiredArgsConstructor
 public class ShippingController {
     private final ShippingService shippingService;
     private final AddressService addressService;
     private final CartService cartService;
-
-    public ShippingController(ShippingService shippingService, AddressService addressService, CartService cartService) {
-        this.shippingService = shippingService;
-        this.addressService = addressService;
-        this.cartService = cartService;
-    }
 
     @GetMapping("/areas")
     BiteshipAreasResponse searchAreas(@RequestParam(required = false) String query,

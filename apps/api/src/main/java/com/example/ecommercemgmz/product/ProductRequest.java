@@ -1,5 +1,6 @@
 package com.example.ecommercemgmz.product;
 
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,7 @@ public record ProductRequest(
         @NotBlank String sku,
         String description,
         @NotNull @DecimalMin("0.01") BigDecimal price,
+        BigDecimal originalPrice,
         @Min(0) int stock,
         @Min(0) int weightGram,
         @Min(0) int lengthCm,
@@ -21,6 +23,8 @@ public record ProductRequest(
         ProductShippingCategory shippingCategory,
         List<String> imageUrls,
         Long categoryId,
-        @NotNull ProductStatus status
+        @NotNull ProductStatus status,
+        @DecimalMin("0.0") @DecimalMax("5.0") BigDecimal averageRating,
+        @Min(0) int reviewCount
 ) {
 }

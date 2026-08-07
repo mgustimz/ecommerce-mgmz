@@ -42,6 +42,7 @@ export function ProductForm({ product }: Props) {
       sku: String(formData.get("sku")),
       description: String(formData.get("description") || ""),
       price: String(formData.get("price")),
+      originalPrice: String(formData.get("originalPrice") || "") || null,
       stock: Number(formData.get("stock")),
       weightGram: Number(formData.get("weightGram")),
       lengthCm: Number(formData.get("lengthCm")),
@@ -78,6 +79,7 @@ export function ProductForm({ product }: Props) {
         <Field label="Slug optional" name="slug" defaultValue={product?.slug} />
         <Field label="SKU" name="sku" defaultValue={product?.sku} required />
         <Field label="Price" name="price" type="number" step="0.01" min="0.01" defaultValue={product?.price} required />
+        <Field label="Original price (optional, for discount)" name="originalPrice" type="number" step="0.01" min="0.01" defaultValue={product?.originalPrice ?? ""} />
         <Field label="Stock" name="stock" type="number" min="0" defaultValue={product?.stock ?? 0} required />
         <Field label="Weight gram" name="weightGram" type="number" min="0" defaultValue={product?.weightGram ?? 0} required />
         <Field label="Length cm" name="lengthCm" type="number" min="0" defaultValue={product?.lengthCm ?? 0} required />

@@ -11,14 +11,15 @@ import com.example.ecommercemgmz.product.Product;
 import com.example.ecommercemgmz.product.ProductService;
 import com.example.ecommercemgmz.shipping.ShippingRateResponse;
 import com.example.ecommercemgmz.shipping.ShippingService;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderService {

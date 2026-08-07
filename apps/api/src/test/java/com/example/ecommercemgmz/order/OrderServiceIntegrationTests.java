@@ -97,6 +97,7 @@ class OrderServiceIntegrationTests {
                 "SKU-" + id,
                 "Test product",
                 BigDecimal.valueOf(100000),
+                null,
                 stock,
                 500,
                 10,
@@ -105,7 +106,9 @@ class OrderServiceIntegrationTests {
                 ProductShippingCategory.others,
                 List.of("https://example.com/product.jpg"),
                 null,
-                ProductStatus.ACTIVE
+                ProductStatus.ACTIVE,
+                null,
+                0
         ));
     }
 

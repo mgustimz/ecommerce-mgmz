@@ -2,16 +2,122 @@
 
 :root {
   color-scheme: light;
+  --brand-red: #cc1d00;
+  --brand-red-dark: #a81700;
+  --surface-dark: #1c1818;
+  --border-muted: #e5e5e5;
+  --star-yellow: #f9c500;
 }
 
 body {
   margin: 0;
-  background: #fbf7ef;
-  color: #241b13;
+  background: #ffffff;
+  color: #1c1818;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--brand-red);
+}
+
+.btn-primary {
+  background: var(--brand-red);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 0;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--brand-red-dark);
+  color: #ffffff;
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: var(--brand-red);
+  border: 1px solid var(--brand-red);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-outline:hover {
+  background: var(--brand-red);
+  color: #ffffff;
+}
+
+.input-field {
+  border: 1px solid #d4d4d4;
+  padding: 0.65rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #1c1818;
+  width: 100%;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 2px rgba(204, 29, 0, 0.15);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #1c1818;
+  border-bottom: 2px solid var(--brand-red);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title a {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-red);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.product-card {
+  background: #ffffff;
+  border: 1px solid var(--border-muted);
+  border-radius: 6px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.star-row {
+  color: var(--star-yellow);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
 }

@@ -8,9 +8,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.time.Instant;
 
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "inventory_movements")
 public class InventoryMovement {
     @Id
@@ -44,9 +51,6 @@ public class InventoryMovement {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    protected InventoryMovement() {
-    }
-
     public InventoryMovement(Long productId, String productName, String productSku, Long orderId, InventoryMovementType type, int quantityChange, int stockAfter, String reason) {
         this.productId = productId;
         this.productName = productName;
@@ -56,45 +60,5 @@ public class InventoryMovement {
         this.quantityChange = quantityChange;
         this.stockAfter = stockAfter;
         this.reason = reason;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public String getProductSku() {
-        return productSku;
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public InventoryMovementType getType() {
-        return type;
-    }
-
-    public int getQuantityChange() {
-        return quantityChange;
-    }
-
-    public int getStockAfter() {
-        return stockAfter;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
     }
 }

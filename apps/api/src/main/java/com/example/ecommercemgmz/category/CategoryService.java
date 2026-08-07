@@ -1,20 +1,17 @@
 package com.example.ecommercemgmz.category;
 
 import com.example.ecommercemgmz.common.ApiException;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
-    }
-
-    public List<CategoryResponse> findAll() {
+    public java.util.List<CategoryResponse> findAll() {
         return categoryRepository.findAll().stream().map(CategoryResponse::from).toList();
     }
 

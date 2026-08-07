@@ -23,12 +23,21 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) {
         return http
                 .cors(Customizer.withDefaults())
+                // CSRF is intentionally disabled. The API is stateless and authenticates
+                // exclusively via the `Authorization: Bearer <jwt>` header read by
+                // JwtAuthenticationFilter. Browsers do NOT auto-attach `Authorization`
+                // headers to cross-origin requests, and the CORS preflight (configured in
+                // `corsConfigurationSource`) blocks such requests from disallowed origins.
+                // The anonymous cart cookie is `SameSite=Lax` and not sent on cross-site POSTs.
+                // Together these are the actual CSRF defense. DO NOT introduce cookie-based
+                // auth or `allowCredentials(true)` without also re-enabling CSRF.
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories", "/api/products", "/api/products/*", "/api/products/slug/*").permitAll()
+                        .requestMatchers("/api/cart/anonymous/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/payments/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -47,7 +56,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Anonymous-Cart-Token"));
         configuration.setExposedHeaders(List.of("Location"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

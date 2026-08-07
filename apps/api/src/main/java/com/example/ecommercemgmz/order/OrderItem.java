@@ -9,9 +9,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import java.math.BigDecimal;
 
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "order_items")
 public class OrderItem {
     @Id
@@ -37,46 +44,11 @@ public class OrderItem {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal lineTotal;
 
-    protected OrderItem() {
-    }
-
     public OrderItem(Long productId, String productName, BigDecimal unitPrice, int quantity, BigDecimal lineTotal) {
         this.productId = productId;
         this.productName = productName;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
         this.lineTotal = lineTotal;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public CustomerOrder getOrder() {
-        return order;
-    }
-
-    public void setOrder(CustomerOrder order) {
-        this.order = order;
-    }
-
-    public Long getProductId() {
-        return productId;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public BigDecimal getLineTotal() {
-        return lineTotal;
     }
 }

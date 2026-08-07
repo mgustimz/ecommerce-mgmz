@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -41,6 +42,7 @@ public class ShippingController {
     }
 
     @PostMapping("/rates")
+    @Transactional(readOnly = true)
     List<ShippingRateResponse> getRates(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody ShippingRateRequest request) {
         List<CartItem> cartItems = cartService.findItemsForCheckout(user.id());
         if (cartItems.isEmpty()) {

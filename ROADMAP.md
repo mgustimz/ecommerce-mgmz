@@ -98,7 +98,8 @@ Single-store ecommerce monorepo. From foundation to a fully featured store.
 
 - [x] Guest cart: add to cart without login, persist across login via anonymous cart + merge
 - [x] Hide "My Account" / "Cart" from the logged-out header (guests see Login / Register)
-- [ ] Real shipping rate selection in checkout (`POST /api/shipping/rates`)
+- [x] Real shipping rate selection in checkout (`POST /api/shipping/rates`)
+- [x] Cart logo icon with total quantity badge in the header
 - [ ] Image upload (replace URL pasting) with local storage or object store
 - [ ] Coupons / promo codes
 - [ ] Product variants (size, color, material)

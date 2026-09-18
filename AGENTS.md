@@ -141,7 +141,7 @@ cd apps/api && ./mvnw test
 
 - Admin product list endpoint is `GET /api/admin/products` (added in this repo). It returns all statuses, unlike the public `/api/products` which is active-only.
 - Admin order detail uses `GET /api/orders/{id}` with an admin JWT (the order controller allows admins through the same path).
-- Checkout currently submits `REG` or `EXP` shipping codes directly; the shipping rate selector UI is not yet wired to `POST /api/shipping/rates`.
+- Checkout fetches real rates from `POST /api/shipping/rates` and lets the customer pick; falls back to `REG` on error. Without Biteship keys configured, the backend returns local `REG`/`EXP` rates.
 - Admin inventory list page is a placeholder; the endpoint `GET /api/admin/inventory-movements` exists but is not yet consumed in the UI.
 
 ## Progress Tracking

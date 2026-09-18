@@ -111,6 +111,23 @@ export type UserProfile = {
   role: string;
 };
 
+export type ShippingRate = {
+  serviceCode: string;
+  courierName: string;
+  serviceName: string;
+  fee: string | number;
+  estimatedDelivery: string;
+};
+
+export type ShippingRateInput = {
+  addressId: number;
+  courierCodes?: string[];
+  type?: string;
+  courierInsurance?: number;
+  destinationCashOnDelivery?: number;
+  destinationCashOnDeliveryType?: string;
+};
+
 export type UserProfileInput = {
   name: string;
   phone?: string | null;
@@ -243,6 +260,10 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       list: (query?: { q?: string; categoryId?: number; sort?: string; page?: number; size?: number }) =>
         request<PageResponse<Product>>("/products", { query }),
       getBySlug: (slug: string) => request<Product>(`/products/slug/${slug}`)
+    },
+    shipping: {
+      rates: (token: string, body: ShippingRateInput) =>
+        request<ShippingRate[]>("/shipping/rates", { method: "POST", token, body })
     },
     cart: {
       get: (token: string) => request<Cart>("/cart", { token }),

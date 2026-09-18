@@ -8,6 +8,7 @@ import com.example.ecommercemgmz.common.ApiException;
 import com.example.ecommercemgmz.inventory.InventoryMovementType;
 import com.example.ecommercemgmz.inventory.InventoryService;
 import com.example.ecommercemgmz.product.Product;
+import com.example.ecommercemgmz.product.ProductRepository;
 import com.example.ecommercemgmz.product.ProductService;
 import com.example.ecommercemgmz.shipping.ShippingRateResponse;
 import com.example.ecommercemgmz.shipping.ShippingService;
@@ -28,15 +29,17 @@ public class OrderService {
     private final AddressService addressService;
     private final ShippingService shippingService;
     private final ProductService productService;
+    private final ProductRepository productRepository;
     private final InventoryService inventoryService;
     private final long paymentExpirationMinutes;
 
-    public OrderService(CustomerOrderRepository orderRepository, CartService cartService, AddressService addressService, ShippingService shippingService, ProductService productService, InventoryService inventoryService, @Value("${app.payment.expiration-minutes}") long paymentExpirationMinutes) {
+    public OrderService(CustomerOrderRepository orderRepository, CartService cartService, AddressService addressService, ShippingService shippingService, ProductService productService, ProductRepository productRepository, InventoryService inventoryService, @Value("${app.payment.expiration-minutes}") long paymentExpirationMinutes) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.addressService = addressService;
         this.shippingService = shippingService;
         this.productService = productService;
+        this.productRepository = productRepository;
         this.inventoryService = inventoryService;
         this.paymentExpirationMinutes = paymentExpirationMinutes;
     }
@@ -73,7 +76,9 @@ public class OrderService {
             if (!product.isPublished()) {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "Product is not active: " + product.getName());
             }
-            if (product.getStock() < cartItem.getQuantity()) {
+            // Atomic reservation: stock >= qty guard prevents concurrent oversell.
+            int deducted = productRepository.deductStock(product.getId(), cartItem.getQuantity());
+            if (deducted == 0) {
                 throw new ApiException(HttpStatus.BAD_REQUEST, "Insufficient stock for " + product.getName());
             }
             product.setStock(product.getStock() - cartItem.getQuantity());

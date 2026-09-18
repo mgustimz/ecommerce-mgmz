@@ -103,7 +103,7 @@ Single-store ecommerce monorepo. From foundation to a fully featured store.
 - [ ] Image upload (replace URL pasting) with local storage or object store
 - [ ] Coupons / promo codes
 - [ ] Product variants (size, color, material)
-- [ ] Stock reservation on checkout (release on payment timeout)
+- [x] Stock reservation on checkout (release on payment timeout) - atomic deduction prevents oversell; expired payments auto-cancel the order and release stock via a 60s sweeper
 - [ ] Cart abandonment tracking
 
 **Effort**: L

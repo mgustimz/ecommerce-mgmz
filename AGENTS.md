@@ -116,6 +116,7 @@ Always extend `packages/api-client/src/index.ts` when adding or changing a backe
 - Cart delete endpoint returns 204; the storefront calls `cart.get` again instead of expecting a body.
 - Admin product form uses backend `ProductShippingCategory` enum values (lowercase, snake_case where applicable: `electronic`, `food_and_drink`, etc.), not human labels.
 - Backend status enums are strings, not booleans (`ProductStatus`: `ACTIVE|DRAFT|ARCHIVED`; `OrderStatus`: `PENDING_PAYMENT|PAID|PROCESSING|SHIPPED|COMPLETED|CANCELLED`).
+- Stock is deducted at checkout (that deduction is the reservation) and released when a payment expires or the order is cancelled. Always mutate stock through the atomic tools in `ProductRepository` (`deductStock` / `restoreStock`); a check-then-set read-modify-write has an oversell race and is rejected in review. `PaymentExpiryScheduler` sweeps expired pending orders every 60s (in-process; add a distributed lock for multi-instance deploys).
 
 ## Lombok Notes
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createApiClient, type Address, type Cart, type ShippingRate } from "@mgmz/api-client";
+import { createApiClient, type Address, type Cart, type CouponPreview, type ShippingRate } from "@mgmz/api-client";
 import { formatCurrency } from "@mgmz/shared";
 import { CustomerAuthGuard } from "@/components/customer-auth-guard";
 import { getToken } from "@/lib/session";
@@ -24,6 +24,10 @@ function CheckoutContent() {
   const [rates, setRates] = useState<ShippingRate[]>([]);
   const [selectedServiceCode, setSelectedServiceCode] = useState<string>("");
   const [ratesLoading, setRatesLoading] = useState(false);
+  const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
+  const [couponMessage, setCouponMessage] = useState<string | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,7 +82,33 @@ function CheckoutContent() {
   const selectedRate = rates.find((rate) => rate.serviceCode === selectedServiceCode);
   const shippingFee = selectedRate ? Number(selectedRate.fee) : 0;
   const subtotal = cart ? Number(cart.subtotal) : 0;
-  const total = subtotal + shippingFee;
+  const discount = couponPreview ? Number(couponPreview.discountAmount) : 0;
+  const total = subtotal - discount + shippingFee;
+
+  async function applyCoupon(formData: FormData) {
+    const token = getToken();
+    if (!token || !subtotal) return;
+    setCouponError(null);
+    setCouponMessage(null);
+    setIsApplyingCoupon(true);
+    try {
+      const preview = await createApiClient().coupons.validate(token, { code: String(formData.get("couponCode")) });
+      setCouponPreview(preview);
+      setCouponMessage(`Coupon ${preview.code} applied`);
+    } catch (err) {
+      setCouponPreview(null);
+      setCouponMessage(null);
+      setCouponError(err instanceof Error ? err.message : "Failed to apply coupon");
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  }
+
+  function removeCoupon() {
+    setCouponPreview(null);
+    setCouponMessage(null);
+    setCouponError(null);
+  }
 
   async function checkout(formData: FormData) {
     const token = getToken();
@@ -90,6 +120,7 @@ function CheckoutContent() {
         addressId: Number(formData.get("addressId")),
         shippingServiceCode: selectedServiceCode || String(formData.get("shippingServiceCode")),
         paymentMethod: String(formData.get("paymentMethod")),
+        couponCode: couponPreview?.code ?? null,
         notes: String(formData.get("notes") ?? "")
       });
       router.push(`/orders/${order.id}`);
@@ -220,8 +251,38 @@ function CheckoutContent() {
                 </li>
               ))}
             </ul>
+
+            <div className="mt-4 border-t border-neutral-200 pt-4">
+              <form action={applyCoupon} className="flex gap-2">
+                <input
+                  name="couponCode"
+                  defaultValue=""
+                  placeholder="Coupon code"
+                  className="input-field flex-1 uppercase"
+                  disabled={Boolean(couponPreview) || !cart.items.length}
+                />
+                {couponPreview ? (
+                  <button type="button" onClick={removeCoupon} className="rounded border border-neutral-300 px-3 text-sm font-bold hover:border-red-600 hover:text-red-600">
+                    Remove
+                  </button>
+                ) : (
+                  <button type="submit" disabled={isApplyingCoupon || !cart.items.length} className="rounded px-4 text-sm font-bold text-white disabled:opacity-50" style={{ background: "#cc1d00" }}>
+                    {isApplyingCoupon ? "..." : "Apply"}
+                  </button>
+                )}
+              </form>
+              {couponMessage && <p className="mt-2 rounded bg-emerald-50 p-2 text-xs font-bold text-emerald-700">{couponMessage}</p>}
+              {couponError && <p className="mt-2 rounded bg-red-50 p-2 text-xs font-bold text-red-700">{couponError}</p>}
+            </div>
+
             <div className="mt-4 border-t border-neutral-200 pt-4">
               <div className="flex justify-between text-sm"><span>Subtotal</span><b>{formatCurrency(cart.subtotal)}</b></div>
+              {discount > 0 && (
+                <div className="mt-1 flex justify-between text-sm text-emerald-700">
+                  <span>Discount ({couponPreview?.code})</span>
+                  <b>-{formatCurrency(discount)}</b>
+                </div>
+              )}
               <div className="mt-1 flex justify-between text-sm">
                 <span>Shipping</span>
                 <b>{ratesLoading ? "..." : formatCurrency(shippingFee)}</b>

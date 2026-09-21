@@ -8,6 +8,7 @@ public record CheckoutRequest(
         @NotNull Long addressId,
         @NotBlank String shippingServiceCode,
         @NotNull PaymentMethod paymentMethod,
+        String couponCode,
         String notes
 ) {
 }

@@ -54,10 +54,13 @@ export default function LoginPage() {
             <label className="text-sm font-bold text-neutral-700">Email</label>
             <input name="email" type="email" required className="input-field mt-2" placeholder="you@example.com" />
           </div>
-          <div>
-            <label className="text-sm font-bold text-neutral-700">Password</label>
-            <input name="password" type="password" required className="input-field mt-2" placeholder="Your password" />
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-neutral-700">Password</span>
+            <Link href="/forgot-password" className="text-xs font-bold" style={{ color: "#cc1d00" }}>
+              Forgot password?
+            </Link>
           </div>
+          <input name="password" type="password" required className="input-field mt-2" placeholder="Your password" />
 
           {error && (
             <p className="rounded border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">

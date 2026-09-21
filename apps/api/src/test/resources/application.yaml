@@ -31,3 +31,11 @@ app:
     origin-longitude:
   payment:
     expiration-minutes: 60
+  rate-limit:
+    login: 1000
+    register: 1000
+    forgot-password: 1000
+    window-seconds: 60
+  mail:
+    mode: log
+    public-base-url: http://localhost:3000

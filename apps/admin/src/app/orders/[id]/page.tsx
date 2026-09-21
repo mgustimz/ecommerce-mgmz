@@ -117,6 +117,9 @@ function AdminOrderDetailContent() {
 
             <div className="border-t border-slate-800 pt-5">
               <p className="flex justify-between text-sm text-slate-300"><span>Subtotal</span><b>{formatCurrency(order.subtotal)}</b></p>
+              {order.couponCode && Number(order.discountAmount) > 0 && (
+                <p className="mt-2 flex justify-between text-sm text-emerald-300"><span>Discount ({order.couponCode})</span><b>-{formatCurrency(order.discountAmount)}</b></p>
+              )}
               <p className="mt-2 flex justify-between text-sm text-slate-300"><span>Shipping</span><b>{formatCurrency(order.shippingFee)}</b></p>
               <p className="mt-4 flex justify-between text-xl font-black text-white"><span>Total</span><b>{formatCurrency(order.total)}</b></p>
             </div>

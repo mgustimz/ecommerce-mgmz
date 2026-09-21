@@ -60,7 +60,8 @@ export default function RegisterPage() {
           </div>
           <div>
             <label className="text-sm font-bold text-neutral-700">Password</label>
-            <input name="password" type="password" minLength={8} required className="input-field mt-2" placeholder="At least 8 characters" />
+            <input name="password" type="password" minLength={8} required className="input-field mt-2" placeholder="Uppercase, lowercase, number (min 8)" />
+            <p className="mt-1 text-xs text-neutral-500">Must contain at least one uppercase letter, one lowercase letter, and one number.</p>
           </div>
 
           {error && (

@@ -73,6 +73,45 @@ function AdminOrderDetailContent() {
     }
   }
 
+  async function simulatePaid() {
+    const token = getAdminToken();
+    if (!token || !order || !confirm("Simulate payment received for this order?")) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      const updated = await createApiClient().payments.simulatePaid(token, order.id);
+      setOrder(updated);
+    } catch (err) {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to simulate payment");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function expirePayment() {
+    const token = getAdminToken();
+    if (!token || !order) return;
+    if (!confirm("Expire this payment? The reserved stock will be released and the order cancelled.")) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await createApiClient().payments.expire(token, order.id);
+      await loadOrder();
+    } catch (err) {
+      if (err instanceof Error && /status 401/.test(err.message)) {
+        forceAdminReLogin();
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to expire payment");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div>
       <Link href="/orders" className="text-sm font-black text-cyan-300">Back to orders</Link>
@@ -131,6 +170,31 @@ function AdminOrderDetailContent() {
               </select>
               <button disabled={isSaving} className="mt-3 w-full rounded-2xl bg-cyan-400 px-5 py-3 font-black text-slate-950 disabled:opacity-60">Save status</button>
             </form>
+
+            {order.status === "PENDING_PAYMENT" && (
+              <form className="border-t border-slate-800 pt-5">
+                <label className="block text-sm font-bold text-slate-300">Payment actions</label>
+                <div className="mt-3 grid gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void simulatePaid()}
+                    disabled={isSaving}
+                    className="w-full rounded-2xl bg-emerald-400 px-5 py-3 font-black text-slate-950 disabled:opacity-60"
+                  >
+                    Simulate paid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void expirePayment()}
+                    disabled={isSaving}
+                    className="w-full rounded-2xl bg-amber-400 px-5 py-3 font-black text-slate-950 disabled:opacity-60"
+                  >
+                    Expire payment
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">Expiring releases reserved stock and cancels the order.</p>
+              </form>
+            )}
 
             <form action={cancelOrder} className="border-t border-slate-800 pt-5">
               <label className="block text-sm font-bold text-slate-300">Cancel order</label>

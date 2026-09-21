@@ -180,6 +180,15 @@ export type DashboardSummary = {
 
 export type InventoryMovementType = "PRODUCT_CREATED" | "ADMIN_ADJUSTMENT" | "ORDER_CREATED" | "ORDER_CANCELLED";
 
+export type Payment = {
+  orderId: number;
+  amount: string | number;
+  method: string;
+  status: string;
+  reference: string | null;
+  expiresAt: string;
+};
+
 export type CouponDiscountType = "PERCENT" | "FIXED";
 
 export type Coupon = {
@@ -299,6 +308,13 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
     shipping: {
       rates: (token: string, body: ShippingRateInput) =>
         request<ShippingRate[]>("/shipping/rates", { method: "POST", token, body })
+    },
+    payments: {
+      getOrder: (token: string, orderId: number) => request<Payment>(`/payments/orders/${orderId}`, { token }),
+      simulatePaid: (token: string, orderId: number) =>
+        request<Order>(`/payments/admin/orders/${orderId}/simulate-paid`, { method: "POST", token }),
+      expire: (token: string, orderId: number) =>
+        request<Payment>(`/payments/admin/orders/${orderId}/expire`, { method: "POST", token })
     },
     coupons: {
       validate: (token: string, body: { code: string }) => request<CouponPreview>("/coupons/validate", { method: "POST", token, body })

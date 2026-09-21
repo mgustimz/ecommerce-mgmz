@@ -116,7 +116,7 @@ Single-store ecommerce monorepo. From foundation to a fully featured store.
 
 - [ ] Real payment gateway (Midtrans / Xendit / Stripe) for `BANK_TRANSFER`, `VIRTUAL_ACCOUNT`, `EWALLET`, `QRIS`
 - [ ] Payment webhook endpoint
-- [ ] Admin "Simulate paid" / "Expire" buttons in order detail (endpoints exist; UI missing)
+- [x] Admin "Simulate paid" / "Expire" buttons in order detail (endpoints existed; UI wired)
 - [ ] Refund / partial refund flow
 - [ ] Invoice generation (PDF)
 

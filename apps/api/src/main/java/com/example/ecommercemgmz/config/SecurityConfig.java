@@ -1,5 +1,6 @@
 package com.example.ecommercemgmz.config;
 
+import com.example.ecommercemgmz.auth.AuthRateLimitFilter;
 import com.example.ecommercemgmz.auth.JwtAuthenticationFilter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,7 +25,9 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 public class SecurityConfig {
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                            JwtAuthenticationFilter jwtAuthenticationFilter,
+                                            AuthRateLimitFilter rateLimitFilter) {
         return http
                 .cors(Customizer.withDefaults())
                 // CSRF is intentionally disabled. The API is stateless and authenticates
@@ -47,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/payments/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

@@ -93,6 +93,9 @@ Flyway auto-migrates on backend startup. If you change entities, add a new `V*__
 - Backend CORS allows `http://localhost:3000` and `http://localhost:3001` (configured in `apps/api/src/main/java/com/example/ecommercemgmz/config/SecurityConfig.java`).
 - Protected customer routes are wrapped in `<CustomerAuthGuard>` (redirects to `/login`); admin routes in `<AdminAuthGuard>` (redirects to `/login`).
 - `JwtAuthenticationFilter` clears the security context on invalid tokens (does not return 401 immediately) so public endpoints still work when a stale token is sent.
+- Passwords must contain uppercase, lowercase and a digit and may not match a common-password blocklist (see `AuthService.validatePassword`).
+- `/api/auth/login|register|forgot-password` are rate-limited per IP by `AuthRateLimitFilter` (fixed window, defaults in `application.yaml`, in-memory counters; multi-instance needs Redis). Exceeding returns 429 + `Retry-After`.
+- Password reset: `POST /api/auth/forgot-password` always returns a neutral message (no user enumeration); tokens are SHA-256 hashed at rest, 30-min expiry, single-use, invalidated on new request. Reset links are logged server-side via `LoggingEmailSender` (`app.mail.mode=log`) because there is no SMTP provider yet.
 
 ## Security Invariants
 
@@ -114,6 +117,7 @@ Always extend `packages/api-client/src/index.ts` when adding or changing a backe
 - App Router only (no `pages/`).
 - API request bodies are typed via inline types in the api-client (e.g. `ProductInput`, `AddressInput`, `CategoryInput`); do not pass `unknown` to the client.
 - Cart delete endpoint returns 204; the storefront calls `cart.get` again instead of expecting a body.
+- Coupons: discount math and validation only happen server-side in `coupon/CouponService` (`quote`); the frontend never computes discounts. Redemption is recorded per order at checkout via `coupon_redemptions` (per-customer single use + global cap enforced in `quote`). `orders.coupon_id` / `orders.discount_amount` feed `OrderResponse.couponCode` / `discountAmount`.
 - Admin product form uses backend `ProductShippingCategory` enum values (lowercase, snake_case where applicable: `electronic`, `food_and_drink`, etc.), not human labels.
 - Backend status enums are strings, not booleans (`ProductStatus`: `ACTIVE|DRAFT|ARCHIVED`; `OrderStatus`: `PENDING_PAYMENT|PAID|PROCESSING|SHIPPED|COMPLETED|CANCELLED`).
 - Stock is deducted at checkout (that deduction is the reservation) and released when a payment expires or the order is cancelled. Always mutate stock through the atomic tools in `ProductRepository` (`deductStock` / `restoreStock`); a check-then-set read-modify-write has an oversell race and is rejected in review. `PaymentExpiryScheduler` sweeps expired pending orders every 60s (in-process; add a distributed lock for multi-instance deploys).

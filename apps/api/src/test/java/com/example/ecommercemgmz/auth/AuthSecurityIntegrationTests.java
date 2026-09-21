@@ -37,7 +37,7 @@ class AuthSecurityIntegrationTests {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "name", "Test Customer",
                                 "email", email,
-                                "password", "password123"
+                                "password", "Str0ngPass!23"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
@@ -54,7 +54,7 @@ class AuthSecurityIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "email", email,
-                                "password", "password123"
+                                "password", "Str0ngPass!23"
                         ))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
@@ -72,7 +72,7 @@ class AuthSecurityIntegrationTests {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "name", "Test Customer",
                                 "email", email,
-                                "password", "password123"
+                                "password", "Str0ngPass!23"
                         ))))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Email is already registered"));
@@ -98,7 +98,7 @@ class AuthSecurityIntegrationTests {
                         .content(objectMapper.writeValueAsString(Map.of(
                                 "name", "Test Customer",
                                 "email", email,
-                                "password", "password123"
+                                "password", "Str0ngPass!23"
                         ))))
                 .andExpect(status().isOk())
                 .andReturn()

@@ -22,4 +22,14 @@ public class AuthController {
     AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
+
+    @PostMapping("/forgot-password")
+    MessageResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return new MessageResponse(authService.forgotPassword(request.email()));
+    }
+
+    @PostMapping("/reset-password")
+    MessageResponse resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        return new MessageResponse(authService.resetPassword(request));
+    }
 }

@@ -35,3 +35,10 @@ app:
     origin-longitude: ${SHIPPER_ORIGIN_LONGITUDE:}
   payment:
     expiration-minutes: ${PAYMENT_EXPIRATION_MINUTES:60}
+  rate-limit:
+    login: ${RATE_LIMIT_LOGIN:5}
+    register: ${RATE_LIMIT_REGISTER:3}
+    forgot-password: ${RATE_LIMIT_FORGOT:3}
+    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
+  mail:
+    mode: ${MAIL_MODE:log}

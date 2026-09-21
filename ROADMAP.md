@@ -81,11 +81,11 @@ Single-store ecommerce monorepo. From foundation to a fully featured store.
 
 ## Phase 5: Trust & Security 🟡 (Next)
 
-- [ ] Forgot password / reset password flow
+- [ ] Forgot password / reset password flow - password rules, rate limiting and reset flow done (fake email: reset link logged server-side via LoggingEmailSender)
 - [ ] Email verification on register
 - [x] Customer profile page (edit name / phone)
-- [ ] Stronger password rules
-- [ ] Rate limiting on auth endpoints
+- [x] Stronger password rules - uppercase/lowercase/digit required plus common-password blocklist
+- [x] Rate limiting on auth endpoints - fixed-window per-IP limiter (login 5, register 3, forgot 3 per minute)
 - [ ] Admin 2FA (TOTP)
 
 **Effort**: M-L
@@ -101,7 +101,7 @@ Single-store ecommerce monorepo. From foundation to a fully featured store.
 - [x] Real shipping rate selection in checkout (`POST /api/shipping/rates`)
 - [x] Cart logo icon with total quantity badge in the header
 - [ ] Image upload (replace URL pasting) with local storage or object store
-- [ ] Coupons / promo codes
+- [x] Coupons / promo codes - PERCENT + FIXED types, min-spend, per-customer single use, global cap, validity window; validation and math server-side only
 - [ ] Product variants (size, color, material)
 - [x] Stock reservation on checkout (release on payment timeout) - atomic deduction prevents oversell; expired payments auto-cancel the order and release stock via a 60s sweeper
 - [ ] Cart abandonment tracking

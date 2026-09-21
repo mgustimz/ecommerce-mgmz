@@ -166,7 +166,7 @@ class PaymentExpiryIntegrationTests {
     }
 
     private OrderResponse checkout(Long customerId, Long addressId) {
-        return orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.BANK_TRANSFER, null));
+        return orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.BANK_TRANSFER, null, null));
     }
 
     private void forceExpiry(Long orderId) {

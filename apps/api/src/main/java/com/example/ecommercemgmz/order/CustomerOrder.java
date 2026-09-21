@@ -1,5 +1,6 @@
 package com.example.ecommercemgmz.order;
 
+import com.example.ecommercemgmz.coupon.Coupon;
 import com.example.ecommercemgmz.payment.PaymentMethod;
 import com.example.ecommercemgmz.payment.PaymentStatus;
 import jakarta.persistence.CascadeType;
@@ -7,9 +8,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -42,6 +46,13 @@ public class CustomerOrder {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal total;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private String shippingAddress;

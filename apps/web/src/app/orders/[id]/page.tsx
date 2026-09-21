@@ -97,6 +97,12 @@ function OrderDetailContent() {
 
             <div className="border-t border-neutral-200 pt-4">
               <div className="flex justify-between text-sm text-neutral-600"><span>Subtotal</span><b>{formatCurrency(order.subtotal)}</b></div>
+              {order.couponCode && Number(order.discountAmount) > 0 && (
+                <div className="mt-1 flex justify-between text-sm text-emerald-700">
+                  <span>Discount ({order.couponCode})</span>
+                  <b>-{formatCurrency(order.discountAmount)}</b>
+                </div>
+              )}
               <div className="mt-1 flex justify-between text-sm text-neutral-600"><span>Shipping</span><b>{formatCurrency(order.shippingFee)}</b></div>
               <div className="mt-3 flex justify-between border-t border-neutral-200 pt-3 text-lg font-black"><span>Total</span><b style={{ color: "#cc1d00" }}>{formatCurrency(order.total)}</b></div>
             </div>

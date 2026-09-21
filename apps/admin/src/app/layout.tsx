@@ -12,6 +12,7 @@ const links = [
   ["Dashboard", "/dashboard"],
   ["Products", "/products"],
   ["Categories", "/categories"],
+  ["Coupons", "/coupons"],
   ["Orders", "/orders"],
   ["Inventory", "/inventory"]
 ];

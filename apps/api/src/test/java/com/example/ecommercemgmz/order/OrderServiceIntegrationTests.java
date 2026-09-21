@@ -58,7 +58,7 @@ class OrderServiceIntegrationTests {
 
         cartService.addItem(customerId, new AddCartItemRequest(product.id(), 3));
 
-        OrderResponse order = orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.QRIS, "test order"));
+        OrderResponse order = orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.QRIS, null, "test order"));
 
         Product updatedProduct = productRepository.findById(product.id()).orElseThrow();
         assertThat(order.status()).isEqualTo(OrderStatus.PENDING_PAYMENT);
@@ -74,7 +74,7 @@ class OrderServiceIntegrationTests {
         ProductResponse product = createProduct(10);
         Long addressId = createAddress(customerId);
         cartService.addItem(customerId, new AddCartItemRequest(product.id(), 4));
-        OrderResponse order = orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.BANK_TRANSFER, null));
+        OrderResponse order = orderService.checkout(customerId, new CheckoutRequest(addressId, "REG", PaymentMethod.BANK_TRANSFER, null, null));
 
         OrderResponse cancelledOrder = orderService.cancelCustomerOrder(customerId, order.id(), new CancelOrderRequest("customer request"));
 

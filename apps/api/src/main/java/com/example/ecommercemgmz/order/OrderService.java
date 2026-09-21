@@ -5,6 +5,11 @@ import com.example.ecommercemgmz.address.CustomerAddress;
 import com.example.ecommercemgmz.cart.CartItem;
 import com.example.ecommercemgmz.cart.CartService;
 import com.example.ecommercemgmz.common.ApiException;
+import com.example.ecommercemgmz.coupon.Coupon;
+import com.example.ecommercemgmz.coupon.CouponQuote;
+import com.example.ecommercemgmz.coupon.CouponRedemption;
+import com.example.ecommercemgmz.coupon.CouponRedemptionRepository;
+import com.example.ecommercemgmz.coupon.CouponService;
 import com.example.ecommercemgmz.inventory.InventoryMovementType;
 import com.example.ecommercemgmz.inventory.InventoryService;
 import com.example.ecommercemgmz.product.Product;
@@ -31,9 +36,11 @@ public class OrderService {
     private final ProductService productService;
     private final ProductRepository productRepository;
     private final InventoryService inventoryService;
+    private final CouponService couponService;
+    private final CouponRedemptionRepository couponRedemptionRepository;
     private final long paymentExpirationMinutes;
 
-    public OrderService(CustomerOrderRepository orderRepository, CartService cartService, AddressService addressService, ShippingService shippingService, ProductService productService, ProductRepository productRepository, InventoryService inventoryService, @Value("${app.payment.expiration-minutes}") long paymentExpirationMinutes) {
+    public OrderService(CustomerOrderRepository orderRepository, CartService cartService, AddressService addressService, ShippingService shippingService, ProductService productService, ProductRepository productRepository, InventoryService inventoryService, CouponService couponService, CouponRedemptionRepository couponRedemptionRepository, @Value("${app.payment.expiration-minutes}") long paymentExpirationMinutes) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.addressService = addressService;
@@ -41,6 +48,8 @@ public class OrderService {
         this.productService = productService;
         this.productRepository = productRepository;
         this.inventoryService = inventoryService;
+        this.couponService = couponService;
+        this.couponRedemptionRepository = couponRedemptionRepository;
         this.paymentExpirationMinutes = paymentExpirationMinutes;
     }
 
@@ -57,6 +66,7 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         ShippingRateResponse shippingRate = shippingService.findRate(request.shippingServiceCode(), address, cartItems, subtotal);
         BigDecimal shippingFee = shippingRate.fee();
+
         CustomerOrder order = new CustomerOrder(
                 customerId,
                 subtotal,
@@ -70,6 +80,16 @@ public class OrderService {
                 shippingRate.serviceCode(),
                 shippingRate.courierName() + " " + shippingRate.serviceName()
         );
+
+        // Coupon: validate against subtotal and reserve the redemption in the same transaction as stock.
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        if (request.couponCode() != null && !request.couponCode().isBlank()) {
+            CouponQuote quote = couponService.quote(request.couponCode(), customerId, subtotal);
+            order.setCoupon(quote.coupon());
+            order.setDiscountAmount(quote.discountAmount());
+            discountAmount = quote.discountAmount();
+        }
+        order.setTotal(subtotal.subtract(discountAmount).add(shippingFee));
 
         for (CartItem cartItem : cartItems) {
             Product product = cartItem.getProduct();
@@ -88,6 +108,9 @@ public class OrderService {
         }
 
         CustomerOrder savedOrder = orderRepository.save(order);
+        if (order.getCoupon() != null) {
+            couponRedemptionRepository.save(new CouponRedemption(order.getCoupon(), savedOrder, customerId, discountAmount));
+        }
         for (CartItem cartItem : cartItems) {
             inventoryService.record(
                     cartItem.getProduct(),

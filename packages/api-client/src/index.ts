@@ -145,6 +145,8 @@ export type Order = {
   id: number;
   customerId: number;
   subtotal: string | number;
+  couponCode: string | null;
+  discountAmount: string | number;
   shippingFee: string | number;
   total: string | number;
   shippingAddress: string;
@@ -177,6 +179,37 @@ export type DashboardSummary = {
 };
 
 export type InventoryMovementType = "PRODUCT_CREATED" | "ADMIN_ADJUSTMENT" | "ORDER_CREATED" | "ORDER_CANCELLED";
+
+export type CouponDiscountType = "PERCENT" | "FIXED";
+
+export type Coupon = {
+  id: number;
+  code: string;
+  discountType: CouponDiscountType;
+  discountValue: string | number;
+  minSubtotal: string | number;
+  validFrom: string;
+  validUntil: string | null;
+  maxRedemptions: number | null;
+  active: boolean;
+  redemptions: number;
+};
+
+export type CouponInput = {
+  code: string;
+  discountType: CouponDiscountType;
+  discountValue: string | number;
+  minSubtotal?: string | number;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  maxRedemptions?: number | null;
+  active: boolean;
+};
+
+export type CouponPreview = {
+  code: string;
+  discountAmount: string | number;
+};
 
 export type InventoryMovement = {
   id: number;
@@ -251,7 +284,9 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
   return {
     auth: {
       login: (body: { email: string; password: string }) => request<AuthSession>("/auth/login", { method: "POST", body }),
-      register: (body: { name: string; email: string; password: string }) => request<AuthSession>("/auth/register", { method: "POST", body })
+      register: (body: { name: string; email: string; password: string }) => request<AuthSession>("/auth/register", { method: "POST", body }),
+      forgotPassword: (body: { email: string }) => request<{ message: string }>("/auth/forgot-password", { method: "POST", body }),
+      resetPassword: (body: { token: string; password: string }) => request<{ message: string }>("/auth/reset-password", { method: "POST", body })
     },
     categories: {
       list: () => request<Category[]>("/categories")
@@ -264,6 +299,9 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
     shipping: {
       rates: (token: string, body: ShippingRateInput) =>
         request<ShippingRate[]>("/shipping/rates", { method: "POST", token, body })
+    },
+    coupons: {
+      validate: (token: string, body: { code: string }) => request<CouponPreview>("/coupons/validate", { method: "POST", token, body })
     },
     cart: {
       get: (token: string) => request<Cart>("/cart", { token }),
@@ -299,7 +337,7 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
     orders: {
       listMine: (token: string) => request<Order[]>("/orders", { token }),
       get: (token: string, id: number) => request<Order>(`/orders/${id}`, { token }),
-      checkout: (token: string, body: { addressId: number; shippingServiceCode: string; paymentMethod: string; notes?: string }) =>
+      checkout: (token: string, body: { addressId: number; shippingServiceCode: string; paymentMethod: string; couponCode?: string | null; notes?: string }) =>
         request<Order>("/orders/checkout", { method: "POST", token, body }),
       cancel: (token: string, id: number, reason: string) => request<Order>(`/orders/${id}/cancel`, { method: "POST", token, body: { reason } })
     },
@@ -330,6 +368,12 @@ export function createApiClient(baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?
       inventory: {
         list: (token: string, query?: { productId?: number }) =>
           request<InventoryMovement[]>("/admin/inventory-movements", { token, query })
+      },
+      coupons: {
+        list: (token: string) => request<Coupon[]>("/admin/coupons", { token }),
+        create: (token: string, body: CouponInput) => request<Coupon>("/admin/coupons", { method: "POST", token, body }),
+        update: (token: string, id: number, body: CouponInput) => request<Coupon>(`/admin/coupons/${id}`, { method: "PUT", token, body }),
+        delete: (token: string, id: number) => request<void>(`/admin/coupons/${id}`, { method: "DELETE", token })
       }
     }
   };
